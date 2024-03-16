@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Engine.Characters
 {
-    internal class CharacterFrameCounter : Character
+    public class CharacterFrameCounter : Character
     {
         public CharacterFrameCounter(CHAR_INFO_ATTRIBUTE characterAttributes = CHAR_INFO_ATTRIBUTE.BG_WHITE | CHAR_INFO_ATTRIBUTE.FG_BLACK) : base()
         {

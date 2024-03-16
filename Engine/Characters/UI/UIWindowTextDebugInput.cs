@@ -11,7 +11,7 @@ namespace Engine.Characters.UI
     /// how to retrieve input debug information and how to render
     /// that information to text for display.
     /// </summary>
-    internal class UIWindowTextDebugInput : UIWindowText
+    public class UIWindowTextDebugInput : UIWindowText
     {
         /// <summary>
         /// <c>JoystickState</c> is a struct that represents a row

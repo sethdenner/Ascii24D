@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    internal class FrameBuffer
+    public class FrameBuffer
     {
         enum EdgeBehavior
         {

@@ -14,7 +14,7 @@ namespace Engine.Characters.UI
     /// representing and generating graphics for UI windows and 
     /// components.
     /// </summary>
-    internal abstract class UI : Character
+    public abstract class UI : Character
     {
         /// <summary>
         /// <c>UI</c> default constructor.

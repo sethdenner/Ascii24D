@@ -11,7 +11,7 @@ namespace Engine.Characters
     /// renders an integer that can be incremented
     /// or decremented.
     /// </summary>
-    internal class CharacterCounter : Character
+    public class CharacterCounter : Character
     {
         /// <summary>
         /// <c>CharacterCounter</c> default constructor.

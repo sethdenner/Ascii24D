@@ -24,7 +24,7 @@ namespace Engine.Characters.UI
     /// nested and automatically sized and positioned according
     /// to a variety of parameters.
     /// </summary>
-    internal class UIWindow : UI
+    public class UIWindow : UI
     {
         /// <summary>
         /// <c>UIWindow</c> constructor. Intializes the window width and

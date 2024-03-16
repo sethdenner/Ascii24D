@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Engine.Characters.UI
 {
-    internal class UIWindowText : UIWindow
+    public class UIWindowText : UIWindow
     {
         public UIWindowText(int width, int height, Vector2 position, string windowText = "") : base(width, height, position)
         {

@@ -50,15 +50,6 @@ namespace EngineTests
             
             mockDirectInput.Verify(directInput => directInput.GetDevices(), Times.Once());
             Assert.Equal(3, input.Devices.Count);
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [Fact]
-        public void TestInputCreateDevice()
-        {
         }
     }
 }

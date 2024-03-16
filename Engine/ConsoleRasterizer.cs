@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    internal static class ConsoleRasterizer
+    public static class ConsoleRasterizer
     {
         static ConsoleRasterizer()
         {
         }
 
-        internal static void CopyBufferToScreen(
+        public static void CopyBufferToScreen(
             CHAR_INFO[] buffer,
             int width,
             int height,
@@ -32,7 +32,7 @@ namespace Engine
 
         private static IntPtr _consoleWindow;
 
-        internal static void InitalizeSurface(int width, int height, int fontWidth, int fontHeight)
+        public static void InitalizeSurface(int width, int height, int fontWidth, int fontHeight)
         {
             ConsoleWindows.InitializeConsole(
                 _consoleWindow,
@@ -45,7 +45,7 @@ namespace Engine
             ConsoleRasterizer.WindowHeight = height;
         }
 
-        internal static void ClearScreen(
+        public static void ClearScreen(
             ushort attributes,
             int width,
             int height,
@@ -63,7 +63,7 @@ namespace Engine
             );
         }
 
-        internal static bool HandleWindowResize(out SMALL_RECT newWindowSize)
+        public static bool HandleWindowResize(out SMALL_RECT newWindowSize)
         {
             bool result = ConsoleWindows.HandleWindowResize(_consoleWindow, out newWindowSize);
             if (result)
@@ -74,17 +74,17 @@ namespace Engine
             return result;
         }
 
-        internal static void UpdateConsoleTitle(float elapsedSeconds)
+        public static void UpdateConsoleTitle(float elapsedSeconds)
         {
             ConsoleWindows.UpdateConsoleTitle(_consoleWindow, elapsedSeconds);
         }
 
-        internal static void CreateConsoleWindow()
+        public static void CreateConsoleWindow()
         {
             _consoleWindow = ConsoleWindows.CreateConsoleWindows();
         }
 
-        internal static int WindowWidth { get; set; }
-        internal static int WindowHeight { get; set; }
+        public static int WindowWidth { get; set; }
+        public static int WindowHeight { get; set; }
     }
 }
