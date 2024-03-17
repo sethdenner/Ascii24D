@@ -2,6 +2,9 @@
 
 namespace Engine.Input
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class InputDeviceKeyboard : InputDeviceDirectInput
     {
         public InputDeviceKeyboard()
@@ -14,7 +17,7 @@ namespace Engine.Input
             _keyboard.Properties.BufferSize = 128;
             _keyboard.Acquire();
         }
-        public KeyboardUpdate[] GetUpdates()
+        public virtual KeyboardUpdate[] GetUpdates()
         {
             if (null == _keyboard)
                 throw new NullReferenceException(nameof(_keyboard));

@@ -119,7 +119,8 @@ namespace Engine.Input
         { 
             foreach (var device in _inputDevices)
             {
-                if (DeviceType.Mouse == device.GetDeviceType())
+                var deviceType = device.GetDeviceType();
+                if (DeviceType.Mouse == deviceType)
                 {
                     InputDeviceMouse mouseDevice = (InputDeviceMouse)device;
                     MouseUpdate[] updates = mouseDevice.GetUpdates();
@@ -128,7 +129,7 @@ namespace Engine.Input
                         Messenger<MouseMessage>.Trigger(device, update);
                     }
                 }
-                else if (DeviceType.Keyboard == device.GetDeviceType())
+                else if (DeviceType.Keyboard == deviceType)
                 {
                     InputDeviceKeyboard keyboardDevice = (InputDeviceKeyboard)device;
                     KeyboardUpdate[] updates = keyboardDevice.GetUpdates();
@@ -138,8 +139,8 @@ namespace Engine.Input
                     }
                 }
                 else if (
-                    DeviceType.Joystick == device.GetDeviceType() ||
-                    DeviceType.Gamepad == device.GetDeviceType()
+                    DeviceType.Joystick == deviceType ||
+                    DeviceType.Gamepad == deviceType
                 )
                 {
                     InputDeviceJoystick joystickDevice = (InputDeviceJoystick)device;

@@ -2,6 +2,9 @@
 
 namespace Engine.Input
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class InputDeviceMouse : InputDeviceDirectInput
     {
         public InputDeviceMouse()
@@ -16,7 +19,7 @@ namespace Engine.Input
             _mouse.Acquire();
 
         }
-        public MouseUpdate[] GetUpdates()
+        public virtual MouseUpdate[] GetUpdates()
         {
             if (null == _mouse)
                 throw new NullReferenceException(nameof(_mouse));

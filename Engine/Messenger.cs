@@ -1,6 +1,6 @@
 ﻿namespace Engine
 {
-    internal static class Messenger<T> where T : System.Delegate
+    public static class Messenger<T> where T : System.Delegate
     {
         private static T? _handle;
 
