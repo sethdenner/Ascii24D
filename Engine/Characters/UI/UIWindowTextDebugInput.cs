@@ -1,8 +1,7 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using SharpDX.DirectInput;
 using Engine.Input;
-
+using Engine.Core;
 
 namespace Engine.Characters.UI
 {
@@ -19,9 +18,21 @@ namespace Engine.Characters.UI
         /// </summary>
         private struct JoystickState
         {
+            /// <summary>
+            /// 
+            /// </summary>
             public int Value { get; set; }
+            /// <summary>
+            /// 
+            /// </summary>
             public int Timestamp { get; set; }
+            /// <summary>
+            /// 
+            /// </summary>
             public int Sequence { get; set; }
+            /// <summary>
+            /// 
+            /// </summary>
             public JoystickOffset Offset { get; set; }
         }
         /// <summary>
@@ -30,11 +41,25 @@ namespace Engine.Characters.UI
         /// </summary>
         private struct KeyboardState
         {
+            /// <summary>
+            /// 
+            /// </summary>
             public int Value { get; set; }
+            /// <summary>
+            /// 
+            /// </summary>
             public int Timestamp { get; set; }
+            /// <summary>
+            /// 
+            /// </summary>
             public int Sequence { get; set; }
+            /// <summary>
+            /// 
+            /// </summary>
             public Key Key { get; set; }
-
+            /// <summary>
+            /// 
+            /// </summary>
             public bool IsPressed { get; set; }
         }
         /// <summary>
@@ -60,8 +85,8 @@ namespace Engine.Characters.UI
         ///     (EnumerateDevices has been called)
         /// </param>
         public UIWindowTextDebugInput(Input.Input input) : base(
-            ConsoleRasterizer.WindowWidth - 2,
-            ConsoleRasterizer.WindowHeight - 2,
+            Native.Native.WindowWidth - 2,
+            Native.Native.WindowHeight - 2,
             new Vector2(1, 1)
         )
         {
@@ -130,8 +155,8 @@ namespace Engine.Characters.UI
                     }
                 }
             }
-            Width = ConsoleRasterizer.WindowWidth - 2;
-            Height = ConsoleRasterizer.WindowHeight - 2;
+            Width = Native.Native.WindowWidth - 2;
+            Height = Native.Native.WindowHeight - 2;
             Position = new Vector2() { X = 1, Y = 1 };
             Text = string.Join("\n", debugText.ToArray());
         }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
+using Engine.Render;
+using Engine.Native;
 
 namespace Engine.Characters.UI
 {
@@ -214,7 +210,7 @@ namespace Engine.Characters.UI
         /// </summary>
         public override void GenerateSprites()
         { 
-            Sprite windowSprite = new Sprite(
+            Sprite<CHAR_INFO> windowSprite = new Sprite<CHAR_INFO>(
                 Width,
                 Height
             );
@@ -240,7 +236,7 @@ namespace Engine.Characters.UI
                 windowSprite.BufferPixels[i] = pixelInfo;
             }
 
-            _sprites = new List<Sprite>();
+            _sprites = new List<Sprite<CHAR_INFO>>();
             _sprites.Add(windowSprite);
         }
         /// <summary>

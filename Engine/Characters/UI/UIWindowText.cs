@@ -1,26 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
+using Engine.Render;
+using Engine.Native;
 
 namespace Engine.Characters.UI
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class UIWindowText : UIWindow
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="position"></param>
+        /// <param name="windowText"></param>
         public UIWindowText(int width, int height, Vector2 position, string windowText = "") : base(width, height, position)
         {
             Text = windowText;
             CharAttributes = CHAR_INFO_ATTRIBUTE.FG_WHITE | CHAR_INFO_ATTRIBUTE.BG_BLACK;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public override void GenerateSprites()
         {
             int windowPositionX = (int)Math.Floor(Position.X);
             int windowPositionY = (int)Math.Floor(Position.Y);
             base.GenerateSprites();
-            Sprite textSprite = new Sprite(
+            Sprite<CHAR_INFO> textSprite = new Sprite<CHAR_INFO>(
                 Width - PaddingRight - PaddingLeft - windowPositionX - BorderWidth,
                 Height - PaddingTop - PaddingBottom - windowPositionY - BorderWidth,
                 PaddingLeft + windowPositionX,
@@ -49,21 +58,33 @@ namespace Engine.Characters.UI
                     }
                     continue;
                 }
-                textSprite.SetPixel(x, y, Text[i], CharAttributes);
+                textSprite.SetPixel(
+                    x,
+                    y,
+                    new CHAR_INFO() {
+                        Char = Text[i],
+                        Attributes = (ushort)CharAttributes
+                    });
             }
 
             Sprites.Add(textSprite);
         }
-
-        public override Sprite Render()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public override Sprite<CHAR_INFO> Render()
         { 
-            Sprite baseSprite = base.Render();
+            Sprite<CHAR_INFO> baseSprite = base.Render();
             return baseSprite;
         }
-
-
-
+        /// <summary>
+        /// 
+        /// </summary>
         public string Text { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public CHAR_INFO_ATTRIBUTE CharAttributes { get; set; }
     }
 }

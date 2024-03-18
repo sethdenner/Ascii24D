@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
+using Engine.Core;
+using Engine.Native;
+using Engine.Render;
 
 namespace Engine.Characters
 {
@@ -20,7 +18,7 @@ namespace Engine.Characters
         public Character() : base()
         {
             // Initialize the _sprites List to empty.
-            _sprites = new List<Sprite>();
+            _sprites = new List<Sprite<CHAR_INFO>>();
         }
         /// <summary>
         /// The <c>Render</c> method compiles all of the elements
@@ -30,7 +28,7 @@ namespace Engine.Characters
         /// Retuns an instance of <c>Sprite</c> representing the
         /// final compiled sprite.
         /// </returns>
-        public virtual Sprite Render()
+        public virtual Sprite<CHAR_INFO> Render()
         {
             GenerateSprites();
             // Calculate the total width and height.
@@ -38,7 +36,7 @@ namespace Engine.Characters
             int height = 0;
             for (int i = 0; i < Sprites.Count; ++i)
             {
-                Sprite sprite = Sprites[i];
+                Sprite<CHAR_INFO> sprite = Sprites[i];
                 int newWidth = sprite.Width + sprite.OffsetX;
                 if (width < newWidth)
                     width = newWidth;
@@ -49,7 +47,7 @@ namespace Engine.Characters
             }
 
             // Composite all the sprites.
-            Sprite finalSprite = new(
+            Sprite<CHAR_INFO> finalSprite = new(
                 width,
                 height,
                 (int)Math.Floor(Position.X),
@@ -88,11 +86,11 @@ namespace Engine.Characters
         /// <c>_sprites</c> is a <c>List</c> collection of <c>Sprite</c> objects
         /// that comprise the character.
         /// </summary>
-        protected List<Sprite> _sprites;
+        protected List<Sprite<CHAR_INFO>> _sprites;
         /// <summary>
         /// <c>Sprties</c> is a property that publicly exposes the <c>_sprites</c> <c>List</c>.
         /// </summary>
-        public  List<Sprite> Sprites { get { return _sprites; } }
+        public  List<Sprite<CHAR_INFO>> Sprites { get { return _sprites; } }
         /// <summary>
         /// 
         /// </summary>

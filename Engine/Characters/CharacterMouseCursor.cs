@@ -1,4 +1,5 @@
-﻿using Engine.Input;
+﻿using Engine.Core;
+using Engine.Input;
 using SharpDX.DirectInput;
 using System;
 using System.Collections.Generic;

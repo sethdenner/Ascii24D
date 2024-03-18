@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Engine.Render;
+using Engine.Native;
 
 namespace Engine.Characters
 {
@@ -49,7 +46,7 @@ namespace Engine.Characters
             // Convert the counter to a string.
             string countString = _count.ToString();
             // Intitialize a sprite with the proper dimensions.
-            Sprite sprite = new Sprite(countString.Length, 1);
+            Sprite<CHAR_INFO> sprite = new Sprite<CHAR_INFO>(countString.Length, 1);
             // Iterate over the counter string.
             for (int i = 0; i < countString.Length; ++i)
             {
@@ -57,8 +54,7 @@ namespace Engine.Characters
                 // the character from the count string
                 // as the glyph to use. Use default color
                 // white background/black foreground.
-                sprite.BufferPixels[i] = new CHAR_INFO()
-                {
+                sprite.BufferPixels[i] = new CHAR_INFO() {
                     Char = countString[i],
                     Attributes = 0x00F0
                 };

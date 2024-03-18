@@ -1,7 +1,8 @@
-﻿using Engine;
-using Engine.Input;
-using Moq;
+﻿using Xunit;
 using SharpDX.DirectInput;
+using Moq;
+using Engine.Core;
+using Engine.Input;
 
 namespace EngineTests
 {

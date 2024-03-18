@@ -8,17 +8,31 @@
 #include <Windows.h>
 
 
-// The following ifdef block is the standard way of creating macros which make exporting
-// from a DLL simpler. All files within this DLL are compiled with the PINVOKELIB_EXPORTS
-// symbol defined on the command line. this symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see
-// PINVOKELIB_API functions as being imported from a DLL, wheras this DLL sees symbols
-// defined with this macro as being exported.
+// The following ifdef block is the standard way of creating macros which make
+// exporting from a DLL simpler. All files within this DLL are compiled with the
+// PINVOKELIB_EXPORTS symbol defined on the command line. this symbol should not
+// be defined on any project that uses this DLL. This way any other project
+// whose source files include this file see PINVOKELIB_API functions as being
+// imported from a DLL, wheras this DLL sees symbols defined with this macro as
+// being exported.
 #ifdef CONSOLEWINDOWSDLL_EXPORTS
 #define CONSOLEWINDOWSDLL_API __declspec(dllexport)
 #else
 #define CONSOLEWINDOWSDLL_API __declspec(dllimport)
 #endif
+
+struct
+{
+	char R;
+	char G;
+	char B;
+} typedef ConsoleColor;
+struct
+{
+	ConsoleColor ForegroundColor;
+	ConsoleColor BackgroundColor;
+	char CharacterCode;
+} typedef ConsolePixel;
 
 enum COLOUR
 {
@@ -60,9 +74,34 @@ class CONSOLEWINDOWSDLL_API CConsoleWindows
 {
 public:
     CConsoleWindows();
-    int InitializeConsole(int width, int height, int fontWidth, int fontHeight);
-    void CopyBufferToScreen(const CHAR_INFO* buffer, const short width, const short height, const short left, const short top);
-	void ClearScreen(const unsigned short attributes, const short width, const short height, const short left, const short top);
+    int InitializeConsole(
+		int width,
+		int height,
+		int fontWidth,
+		int fontHeight
+	);
+    void CopyBufferToScreen(
+		const CHAR_INFO* buffer,
+		const short width,
+		const short height,
+		const short left,
+		const short top
+	);
+	void CopyBufferToScreenVT(
+		const ConsolePixel* buffer,
+		const int bufferLength,
+		const int width,
+		const int height,
+		const int left,
+		const int top
+	);
+	void ClearScreen(
+		const unsigned short attributes,
+		const short width,
+		const short height,
+		const short left,
+		const short top
+	);
 	bool HandleWindowResize(SMALL_RECT& newWindowSize);
 	bool GetWindowSize(SMALL_RECT& windowSize);
 	void UpdateConsoleTitle(const float elapsedTime);
@@ -71,7 +110,6 @@ protected:
 	int Error(const wchar_t* msg);
 
     static BOOL OnClose(DWORD evt);
-
 
 private:
     HANDLE _consoleHandle;
@@ -96,13 +134,53 @@ extern "C"
 #endif
 
     CONSOLEWINDOWSDLL_API CConsoleWindows* CreateConsoleWindows();
-	CONSOLEWINDOWSDLL_API void DestroyConsoleWindows(CConsoleWindows* consoleWindow);
-	CONSOLEWINDOWSDLL_API int InitializeConsole(CConsoleWindows* consoleWindow, int width, int height, int fontWidth, int fontHeight);
-	CONSOLEWINDOWSDLL_API void CopyBufferToScreen(CConsoleWindows* consoleWindow, const CHAR_INFO* buffer, const int width, const int height, const int left, const int top);
-	CONSOLEWINDOWSDLL_API void ClearScreen(CConsoleWindows* consoleWindow, const WORD attributes, const short width, const short height, const short left, const short top);
-	CONSOLEWINDOWSDLL_API bool HandleWindowResize(CConsoleWindows* consoleWindow, SMALL_RECT& newWindowSize);
-	CONSOLEWINDOWSDLL_API bool GetWindowSize(CConsoleWindows* consoleWindow, SMALL_RECT& windowSize);
-	CONSOLEWINDOWSDLL_API void UpdateConsoleTitle(CConsoleWindows* consoleWindow, const float elapsedTime);
+	CONSOLEWINDOWSDLL_API void DestroyConsoleWindows(
+		CConsoleWindows* consoleWindow
+	);
+	CONSOLEWINDOWSDLL_API int InitializeConsole(
+		CConsoleWindows* consoleWindow,
+		int width,
+		int height,
+		int fontWidth,
+		int fontHeight
+	);
+	CONSOLEWINDOWSDLL_API void CopyBufferToScreen(
+		CConsoleWindows* consoleWindow,
+		const CHAR_INFO* buffer,
+		const int width,
+		const int height,
+		const int left,
+		const int top
+	);
+	CONSOLEWINDOWSDLL_API void CopyBufferToScreenVT(
+		CConsoleWindows* consoleWindow,
+		const ConsolePixel* buffer,
+		const int bufferLength,
+		const int width,
+		const int height,
+		const int left,
+		const int top
+	);
+	CONSOLEWINDOWSDLL_API void ClearScreen(
+		CConsoleWindows* consoleWindow,
+		const WORD attributes,
+		const short width,
+		const short height,
+		const short left,
+		const short top
+	);
+	CONSOLEWINDOWSDLL_API bool HandleWindowResize(
+		CConsoleWindows* consoleWindow,
+		SMALL_RECT& newWindowSize
+	);
+	CONSOLEWINDOWSDLL_API bool GetWindowSize(
+		CConsoleWindows* consoleWindow,
+		SMALL_RECT& windowSize
+	);
+	CONSOLEWINDOWSDLL_API void UpdateConsoleTitle(
+		CConsoleWindows* consoleWindow,
+		const float elapsedTime
+	);
 
 #ifdef __cplusplus
 }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Engine.Render;
+using Engine.Native;
 
 namespace Engine.Characters
 {
@@ -38,17 +35,16 @@ namespace Engine.Characters
         {
             string fpsString = _fps.ToString() + "FPS";
 
-            Sprite stamp = new Sprite(fpsString.Length, 1, -fpsString.Length, 0);
+            Sprite<CHAR_INFO> sprite = new Sprite<CHAR_INFO>(fpsString.Length, 1, -fpsString.Length, 0);
             for (int i = 0; i < fpsString.Length; ++i)
             {
-                stamp.BufferPixels[i] = new CHAR_INFO()
-                {
+                sprite.BufferPixels[i] = new CHAR_INFO() {
                     Char = fpsString[i],
                     Attributes = (ushort)_characterAttributes
                 };
             }
             Sprites.Clear();
-            Sprites.Add(stamp);
+            Sprites.Add(sprite);
         }
 
         private double _fps;

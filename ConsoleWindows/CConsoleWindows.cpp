@@ -2,9 +2,11 @@
 
 #define CONSOLEWINDOWSDLL_EXPORTS
 #include "CConsoleWindows.h"
+#include "EscapeSequences.h"
 
 #include <iostream>
 
+// Forward declarations for objects required for maintaining thread saftey.
 std::atomic<bool> CConsoleWindows::_isAtomActive;
 std::mutex CConsoleWindows::_gameMutex;
 std::condition_variable CConsoleWindows::_gameFinished;
@@ -18,8 +20,12 @@ CConsoleWindows::CConsoleWindows()
 
 }
 
-int CConsoleWindows::InitializeConsole(int width, int height, int fontWidth, int fontHeight)
-{
+int CConsoleWindows::InitializeConsole(
+	int width,
+	int height,
+	int fontWidth,
+	int fontHeight
+) {
 	_consoleHandle = CreateConsoleScreenBuffer(
 		GENERIC_READ | GENERIC_WRITE,
 		0,
@@ -36,17 +42,19 @@ int CConsoleWindows::InitializeConsole(int width, int height, int fontWidth, int
 	_screenWidth = width;
 	_screenHeight = height;
 
-	// Update 13/09/2017 - It seems that the console behaves differently on some systems
-	// and I'm unsure why this is. It could be to do with windows default settings, or
-	// screen resolutions, or system languages. Unfortunately, MSDN does not offer much
-	// by way of useful information, and so the resulting sequence is the reult of experiment
-	// that seems to work in multiple cases.
+	// Update 13/09/2017 - It seems that the console behaves differently on some
+	// systems and I'm unsure why this is. It could be to do with windows
+	// default settings, or screen resolutions, or system languages.
+	// Unfortunately, MSDN does not offer much by way of useful information,
+	// and so the resulting sequence is the reult of experiment that seems to
+	// work in multiple cases.
 	//
-	// The problem seems to be that the SetConsoleXXX functions are somewhat circular and 
-	// fail depending on the state of the current console properties, i.e. you can't set
-	// the buffer size until you set the screen size, but you can't change the screen size
-	// until the buffer size is correct. This coupled with a precise ordering of calls
-	// makes this procedure seem a little mystical :-P. Thanks to wowLinh for helping - Jx9
+	// The problem seems to be that the SetConsoleXXX functions are somewhat
+	// circular and fail depending on the state of the current console
+	// properties, i.e. you can't set the buffer size until you set the screen
+	// size, but you can't change the screen size until the buffer size is
+	// correct. This coupled with a precise ordering of calls makes this
+	// procedure seem a little mystical :-P. Thanks to wowLinh for helping - Jx9
 
 	// Change console visual size to a minimum so ScreenBuffer can shrink
 	// below the actual visual size
@@ -62,7 +70,8 @@ int CConsoleWindows::InitializeConsole(int width, int height, int fontWidth, int
 	if (!SetConsoleActiveScreenBuffer(_consoleHandle))
 		return Error(L"SetConsoleActiveScreenBuffer");
 
-	// Set the font size now that the screen buffer has been assigned to the console
+	// Set the font size now that the screen buffer has been assigned to the
+	// console.
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(cfi);
 	cfi.nFont = 0;
@@ -71,17 +80,8 @@ int CConsoleWindows::InitializeConsole(int width, int height, int fontWidth, int
 	cfi.FontFamily = FF_DONTCARE;
 	cfi.FontWeight = FW_NORMAL;
 
-	/*	DWORD version = GetVersion();
-		DWORD major = (DWORD)(LOBYTE(LOWORD(version)));
-		DWORD minor = (DWORD)(HIBYTE(LOWORD(version)));*/
-
-		//if ((major > 6) || ((major == 6) && (minor >= 2) && (minor < 4)))		
-		//	wcscpy_s(cfi.FaceName, L"Raster"); // Windows 8 :(
-		//else
-		//	wcscpy_s(cfi.FaceName, L"Lucida Console"); // Everything else :P
-
-		//wcscpy_s(cfi.FaceName, L"Liberation Mono");
-	wcscpy_s(cfi.FaceName, L"Perfect DOS VGA 437"); // Windows 10 use "Terminal" to get "Raster Fonts" for some reason.
+	// Using Perfect DOS Code 437 font. TODO: Make this configurable.
+	wcscpy_s(cfi.FaceName, L"Perfect DOS VGA 437");
 	if (!SetCurrentConsoleFontEx(_consoleHandle, false, &cfi))
 		return Error(L"SetCurrentConsoleFontEx");
 
@@ -101,8 +101,13 @@ int CConsoleWindows::InitializeConsole(int width, int height, int fontWidth, int
 		return Error(L"SetConsoleWindowInfo");
 
 	// Set flags to allow mouse input		
-	if (!SetConsoleMode(_consoleHandleIn, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT))
-		return Error(L"SetConsoleMode");
+	if (!SetConsoleMode(
+		_consoleHandleIn,
+		ENABLE_EXTENDED_FLAGS |
+		ENABLE_WINDOW_INPUT |
+		ENABLE_MOUSE_INPUT |
+		ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	)) return Error(L"SetConsoleMode");
 
 	// Allocate memory for screen buffer
 	if (NULL != _screenBuffer)
@@ -120,7 +125,15 @@ int CConsoleWindows::InitializeConsole(int width, int height, int fontWidth, int
 int CConsoleWindows::Error(const wchar_t* msg)
 {
 	wchar_t buf[256];
-	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buf, 256, NULL);
+	FormatMessage(
+		FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL,
+		GetLastError(),
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		buf,
+		256,
+		NULL
+	);
 	SetConsoleActiveScreenBuffer(_originalConsole);
 	wprintf(L"ERROR: %s\n\t%s\n", msg, buf);
 	return 0;
@@ -128,9 +141,9 @@ int CConsoleWindows::Error(const wchar_t* msg)
 
 BOOL CConsoleWindows::OnClose(DWORD evt)
 {
-	// Note this gets called in a seperate OS thread, so it must
-	// only exit when the game has finished cleaning up, or else
-	// the process will be killed before OnUserDestroy() has finished
+	// Note this gets called in a seperate OS thread, so it must only exit when
+	// the game has finished cleaning up, or else the process will be killed
+	// before OnUserDestroy() has finished.
 	if (evt == CTRL_CLOSE_EVENT)
 	{
 		_isAtomActive = false;
@@ -142,8 +155,13 @@ BOOL CConsoleWindows::OnClose(DWORD evt)
 	return true;
 }
 
-void CConsoleWindows::CopyBufferToScreen(const CHAR_INFO* buffer, const short width, const short height, const short left, const short top)
-{
+void CConsoleWindows::CopyBufferToScreen(
+	const CHAR_INFO* buffer,
+	const short width,
+	const short height,
+	const short left,
+	const short top
+) {
     COORD bufferSize = { width, height };
     bufferSize.X = width;
     bufferSize.Y = height;
@@ -159,9 +177,40 @@ void CConsoleWindows::CopyBufferToScreen(const CHAR_INFO* buffer, const short wi
     );
 
 }
+void CConsoleWindows::CopyBufferToScreenVT(
+	const ConsolePixel* buffer,
+	const int bufferLength,
+	const int width,
+	const int height,
+	const int left,
+	const int top
+) {
+	std::string output = std::string();
+	output += CURSOR_MOVE(top, left);
+	for (int i = 0; i < bufferLength; ++i)
+	{
+		const ConsolePixel pixel = buffer[i];
+		output += COLOR_FG(
+			pixel.ForegroundColor.R,
+			pixel.ForegroundColor.G,
+			pixel.ForegroundColor.B
+		);
+		output += COLOR_BG(
+			pixel.BackgroundColor.R,
+			pixel.BackgroundColor.G,
+			pixel.BackgroundColor.B
+		);
+	}
+	fputs(output.c_str(), stdout);
+}
 
-void CConsoleWindows::ClearScreen(const unsigned short attributes, const short width, const short height, const short left, const short top)
-{
+void CConsoleWindows::ClearScreen(
+	const unsigned short attributes,
+	const short width,
+	const short height,
+	const short left,
+	const short top
+) {
 	COORD bufferDimensions = { width, height };
 	bufferDimensions.X = width;
 	bufferDimensions.Y = height;
@@ -225,7 +274,13 @@ void CConsoleWindows::UpdateConsoleTitle(const float elapsedTime)
 {
 	// Update Title & Present Screen Buffer
 	wchar_t s[256];
-	swprintf_s(s, 256, L"Ascii24D Console Game - %hs - FPS: %3.2f", "Test Game", 1.0f / elapsedTime);
+	swprintf_s(
+		s,
+		256,
+		L"Ascii24D Console Game - %hs - FPS: %3.2f",
+		"Test Game",
+		1.0f / elapsedTime
+	);
 	SetConsoleTitle(s);
 
 }
@@ -240,8 +295,13 @@ void DestroyConsoleWindows(CConsoleWindows* consoleWindow)
     delete consoleWindow;
 }
 
-int InitializeConsole(CConsoleWindows* consoleWindow, int width, int height, int fontWidth, int fontHeight)
-{
+int InitializeConsole(
+	CConsoleWindows* consoleWindow,
+	int width,
+	int height,
+	int fontWidth,
+	int fontHeight
+) {
 	return consoleWindow->InitializeConsole(
 		width,
 		height,
@@ -250,8 +310,15 @@ int InitializeConsole(CConsoleWindows* consoleWindow, int width, int height, int
 	);
 }
 
-void CopyBufferToScreen(CConsoleWindows* consoleWindow, const CHAR_INFO* buffer, const int width, const int height, const int left, const int top)
-{
+void CopyBufferToScreen(
+	CConsoleWindows*
+	consoleWindow,
+	const CHAR_INFO* buffer,
+	const int width,
+	const int height,
+	const int left,
+	const int top
+) {
     consoleWindow->CopyBufferToScreen(
         buffer,
         width,
@@ -261,18 +328,47 @@ void CopyBufferToScreen(CConsoleWindows* consoleWindow, const CHAR_INFO* buffer,
     );
 }
 
-bool HandleWindowResize(CConsoleWindows* consoleWindow, SMALL_RECT &newWindowSize)
-{
+void CopyBufferToScreenVT(
+	CConsoleWindows* consoleWindow,
+	const ConsolePixel* buffer,
+	const int bufferLength,
+	const int width,
+	const int height,
+	const int left,
+	const int top
+) {
+	consoleWindow->CopyBufferToScreenVT(
+		buffer,
+		bufferLength,
+		width,
+		height,
+		left,
+		top
+	);
+}
+
+bool HandleWindowResize(
+	CConsoleWindows* consoleWindow,
+	SMALL_RECT &newWindowSize
+) {
 	return consoleWindow->HandleWindowResize(newWindowSize);
 }
 
- void UpdateConsoleTitle(CConsoleWindows* consoleWindow, const float elapsedTime)
-{
+ void UpdateConsoleTitle(
+	 CConsoleWindows* consoleWindow,
+	 const float elapsedTime
+) {
 	 consoleWindow->UpdateConsoleTitle(elapsedTime);
 }
 
-void ClearScreen(CConsoleWindows* consoleWindow, const WORD attributes, const short width, const short height, const short left, const short top)
-{
+void ClearScreen(
+	CConsoleWindows* consoleWindow,
+	const WORD attributes,
+	const short width,
+	const short height,
+	const short left,
+	const short top
+) {
 	consoleWindow->ClearScreen(
 		attributes,
 		width,

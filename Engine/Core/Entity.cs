@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine.Core
 {
     /// <summary>
     /// <c>Entity</c> is the root class of every object in the engine
