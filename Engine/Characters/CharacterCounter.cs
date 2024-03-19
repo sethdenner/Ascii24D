@@ -46,10 +46,11 @@ namespace Engine.Characters
             // Convert the counter to a string.
             string countString = _count.ToString();
             // Intitialize a sprite with the proper dimensions.
-            Sprite<CHAR_INFO> sprite = new Sprite<CHAR_INFO>(countString.Length, 1);
+            Sprite sprite = new Sprite(countString.Length, 1);
             // Iterate over the counter string.
             for (int i = 0; i < countString.Length; ++i)
             {
+#if COLOR_MODE_4_BIT
                 // Set the CHAR_INFO for the pixel. Use
                 // the character from the count string
                 // as the glyph to use. Use default color
@@ -58,14 +59,26 @@ namespace Engine.Characters
                     Char = countString[i],
                     Attributes = 0x00F0
                 };
+#elif COLOR_MODE_24_BIT
+                sprite.BufferPixels[i] = new ConsolePixel{
+                    ForegroundColor = new Native.ConsoleColor() { },
+                    BackgroundColor = new Native.ConsoleColor() {
+                        R = (byte)255, G = (byte)255, B = (byte)255
+                    },
+                    CharacterCode = (byte)countString[i]
+                };
+#endif
             }
             // Clear any previous sprites.
             Sprites.Clear();
             // Add the newly generated sprite.
             Sprites.Add(sprite);
         }
-
         public int Count { get { return _count; } set { _count = value; } }
+
+        public Native.ConsoleColor ForegroundColor { get; private set; }
+        public Native.ConsoleColor BackgroundColor { get; private set; }
+
         private int _count;
     }
 }

@@ -9,10 +9,12 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningLevel>9999</WarningLevel>
+    <DefineConstants>$(DefineConstants);COLOR_MODE_24_BIT</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <WarningLevel>9999</WarningLevel>
+    <DefineConstants>$(DefineConstants);COLOR_MODE_24_BIT</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

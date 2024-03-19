@@ -20,7 +20,7 @@ namespace Engine.Render
         /// <summary>
         /// <c>Sprite</c> default constructor.
         /// </summary>
-        public Sprite() 
+        public Sprite()
         {
             Width = 0; Height = 0;
             OffsetX = 0; OffsetY = 0;
@@ -41,7 +41,8 @@ namespace Engine.Render
             int offsetX = 0,
             int offsetY = 0,
             EdgeBehavior edgeBehavior = EdgeBehavior.CLAMP
-        ) {
+        )
+        {
             Width = width;
             Height = height;
             OffsetX = offsetX;
@@ -58,7 +59,8 @@ namespace Engine.Render
         public static Sprite<BufferPixelType> operator +(
             Sprite<BufferPixelType> lhs,
             Sprite<BufferPixelType> rhs
-        ) {
+        )
+        {
             for (int y = 0; y < rhs.Height; ++y)
             {
                 for (int x = 0; x < rhs.Width; ++x)
@@ -68,14 +70,17 @@ namespace Engine.Render
                     if (
                         EdgeBehavior.CLAMP ==
                         lhs.EdgeBehavior
-                    ) {
+                    )
+                    {
                         // Handle clamping.
                         if (xCoord >= lhs.Width || xCoord < 0) continue;
                         if (yCoord >= lhs.Height || yCoord < 0) continue;
-                    } else if (
+                    }
+                    else if (
                         EdgeBehavior.WRAP ==
                         lhs.EdgeBehavior
-                    ) {
+                    )
+                    {
                         // Handle wrapping.
                         if (xCoord >= lhs.Width || xCoord < 0) xCoord = (
                             lhs.Width - Math.Abs(xCoord) % lhs.Width
@@ -126,7 +131,8 @@ namespace Engine.Render
             int x,
             int y,
             BufferPixelType bufferPixel
-        ) {
+        )
+        {
             if (Width <= x || 0 > x || Height <= y || 0 > y)
                 return false;
 
@@ -144,6 +150,53 @@ namespace Engine.Render
             {
                 BufferPixels[i] = bufferPixel;
             }
+        }
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Sprite : Sprite<ConsolePixel>
+    {
+        /// <summary>
+        /// <c>Sprite</c> default constructor.
+        /// </summary>
+        public Sprite() : base()
+        { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="offsetX"></param>
+        /// <param name="offsetY"></param>
+        /// <param name="edgeBehavior"></param>
+        public Sprite(
+            int width,
+            int height,
+            int offsetX = 0,
+            int offsetY = 0,
+            EdgeBehavior edgeBehavior = EdgeBehavior.CLAMP
+        ) : base(
+            width,
+            height,
+            offsetX,
+            offsetY,
+            edgeBehavior
+        ) { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="lhs"></param>
+        /// <param name="rhs"></param>
+        /// <returns></returns>
+        public static Sprite operator +(
+            Sprite lhs,
+            Sprite rhs
+        )
+        {
+            return (Sprite)(
+                (Sprite<ConsolePixel>)lhs + (Sprite<ConsolePixel>)rhs
+            );
         }
     }
 }

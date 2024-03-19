@@ -58,7 +58,7 @@ namespace Engine.Native
         /// <summary>
         /// <c>Char</c> is the value representing the font glyph to render.
         /// </summary>
-        public char Char;
+        public byte Char;
         /// <summary>
         /// <c>Attributes</c> is a combination of CHAR_INFO_ATTRIBUTE enum
         /// flags.
@@ -82,9 +82,9 @@ namespace Engine.Native
     [StructLayout(LayoutKind.Sequential)]
     public struct ConsoleColor
     {
-        public char R;
-        public char G;
-        public char B;
+        public byte R;
+        public byte G;
+        public byte B;
     }
     /// <summary>
     /// 
@@ -94,7 +94,7 @@ namespace Engine.Native
     {
         public ConsoleColor ForegroundColor;
         public ConsoleColor BackgroundColor;
-        public char CharacterCode;
+        public byte CharacterCode;
     }
     /// <summary>
     /// 
@@ -176,7 +176,6 @@ namespace Engine.Native
         public static extern void CopyBufferToScreenVT(
             nint consoleWindow,
             ConsolePixel[] buffer,
-            int bufferLength,
             int width,
             int height,
             int left,

@@ -64,7 +64,6 @@
         /// <param name="top"></param>
         public static void CopyBufferToScreenVT(
             ConsolePixel[] buffer,
-            int bufferLength,
             int width,
             int height,
             int left,
@@ -74,7 +73,6 @@
             NativeWindows.CopyBufferToScreenVT(
                 _consoleWindow,
                 buffer,
-                bufferLength,
                 width,
                 height,
                 left,

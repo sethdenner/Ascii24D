@@ -23,15 +23,15 @@
 
 struct
 {
-	char R;
-	char G;
-	char B;
+	unsigned char R;
+	unsigned char G;
+	unsigned char B;
 } typedef ConsoleColor;
 struct
 {
 	ConsoleColor ForegroundColor;
 	ConsoleColor BackgroundColor;
-	char CharacterCode;
+	unsigned char CharacterCode;
 } typedef ConsolePixel;
 
 enum COLOUR
@@ -89,7 +89,6 @@ public:
 	);
 	void CopyBufferToScreenVT(
 		const ConsolePixel* buffer,
-		const int bufferLength,
 		const int width,
 		const int height,
 		const int left,
@@ -155,7 +154,6 @@ extern "C"
 	CONSOLEWINDOWSDLL_API void CopyBufferToScreenVT(
 		CConsoleWindows* consoleWindow,
 		const ConsolePixel* buffer,
-		const int bufferLength,
 		const int width,
 		const int height,
 		const int left,

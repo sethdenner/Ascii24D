@@ -33,10 +33,6 @@ namespace DirectInputDebugDemo
             int fontWidth = 12;
             int fontHeight = 12;
 
-            // These values become unreliable once we start
-            // changing the console window with the native 
-            // windows api. Initialize with them here but we
-            // need to keep track of these values ourselves.
             Native.CreateConsoleWindow();
             Native.InitalizeSurface(
                 80,
@@ -47,7 +43,7 @@ namespace DirectInputDebugDemo
 
             Console.Clear();
 
-            Sprite<CHAR_INFO> framebuffer = new(
+            Sprite framebuffer = new(
                 Native.WindowWidth,
                 Native.WindowHeight
             );
@@ -80,7 +76,7 @@ namespace DirectInputDebugDemo
                 SMALL_RECT newWindowSize;
                 if (Native.HandleWindowResize(out newWindowSize))
                 {
-                    framebuffer = new Sprite<CHAR_INFO>(
+                    framebuffer = new Sprite(
                         newWindowSize.Right - newWindowSize.Left,
                         newWindowSize.Bottom - newWindowSize.Top,
                         newWindowSize.Left,
@@ -90,13 +86,18 @@ namespace DirectInputDebugDemo
 
                 try
                 {
-                    
-                    framebuffer.Fill(new CHAR_INFO() {
-                        Char = ' ',
-                        Attributes = (ushort)(
-                            CHAR_INFO_ATTRIBUTE.BG_RED |
-                            CHAR_INFO_ATTRIBUTE.FG_RED
-                        )
+                    framebuffer.Fill(new ConsolePixel() {
+                        ForegroundColor = new Engine.Native.ConsoleColor() {
+                            R = (byte)255,
+                            G = (byte)0,
+                            B = (byte)0
+                        },
+                        BackgroundColor = new Engine.Native.ConsoleColor() {
+                            R = (byte)255,
+                            G = (byte)0,
+                            B = (byte)0
+                        },
+                        CharacterCode = (byte)' '
                     });
                 }
                 catch (System.IndexOutOfRangeException)
@@ -107,7 +108,7 @@ namespace DirectInputDebugDemo
                         fontWidth,
                         fontHeight
                     );
-                    framebuffer = new Sprite<CHAR_INFO>(
+                    framebuffer = new Sprite(
                        newWindowSize.Right - newWindowSize.Left,
                        newWindowSize.Bottom - newWindowSize.Top,
                        newWindowSize.Left,
@@ -122,7 +123,7 @@ namespace DirectInputDebugDemo
 
                 try
                 {
-                    Native.CopyBufferToScreen(
+                    Native.CopyBufferToScreenVT(
                         framebuffer.BufferPixels,
                         framebuffer.Width,
                         framebuffer.Height,
@@ -138,7 +139,7 @@ namespace DirectInputDebugDemo
                         fontWidth,
                         fontHeight
                     );
-                    framebuffer = new Sprite<CHAR_INFO>(
+                    framebuffer = new Sprite(
                         newWindowSize.Right - newWindowSize.Left,
                         newWindowSize.Bottom - newWindowSize.Top,
                         newWindowSize.Left,

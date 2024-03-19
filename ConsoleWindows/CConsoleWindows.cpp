@@ -4,7 +4,9 @@
 #include "CConsoleWindows.h"
 #include "EscapeSequences.h"
 
+#include <stdio.h>
 #include <iostream>
+#include <sstream>
 
 // Forward declarations for objects required for maintaining thread saftey.
 std::atomic<bool> CConsoleWindows::_isAtomActive;
@@ -179,29 +181,59 @@ void CConsoleWindows::CopyBufferToScreen(
 }
 void CConsoleWindows::CopyBufferToScreenVT(
 	const ConsolePixel* buffer,
-	const int bufferLength,
 	const int width,
 	const int height,
 	const int left,
 	const int top
 ) {
-	std::string output = std::string();
-	output += CURSOR_MOVE(top, left);
+	std::wostringstream output;
+	int bufferLength = width * height;
+	int currentRow = 0;
+	COORD bufferCoord = {};
+	output << CURSOR_MOVE(left, top);
+	ConsolePixel previousPixel = {};
 	for (int i = 0; i < bufferLength; ++i)
 	{
 		const ConsolePixel pixel = buffer[i];
-		output += COLOR_FG(
-			pixel.ForegroundColor.R,
-			pixel.ForegroundColor.G,
-			pixel.ForegroundColor.B
-		);
-		output += COLOR_BG(
-			pixel.BackgroundColor.R,
-			pixel.BackgroundColor.G,
-			pixel.BackgroundColor.B
-		);
+		if (0 == pixel.CharacterCode)
+		{
+			continue;
+		}
+		if (
+			pixel.ForegroundColor.R != previousPixel.ForegroundColor.R ||
+			pixel.ForegroundColor.G != previousPixel.ForegroundColor.G ||
+			pixel.ForegroundColor.B != previousPixel.ForegroundColor.B
+		) {
+			output << COLOR_FG(
+				pixel.ForegroundColor.R,
+				pixel.ForegroundColor.G,
+				pixel.ForegroundColor.B
+			);
+		}
+		if (
+			pixel.BackgroundColor.R != previousPixel.BackgroundColor.R ||
+			pixel.BackgroundColor.G != previousPixel.BackgroundColor.G ||
+			pixel.BackgroundColor.B != previousPixel.BackgroundColor.B
+		) {
+			output << COLOR_BG(
+				pixel.BackgroundColor.R,
+				pixel.BackgroundColor.G,
+				pixel.BackgroundColor.B
+			);
+		}
+		output << (char)pixel.CharacterCode;
+		previousPixel = pixel;
 	}
-	fputs(output.c_str(), stdout);
+
+	std::wstring outputString = output.str();
+	DWORD charsWritten = 0;
+	WriteConsole(
+		_consoleHandle,
+		outputString.c_str(),
+		outputString.length(),
+		&charsWritten,
+		NULL
+	);
 }
 
 void CConsoleWindows::ClearScreen(
@@ -331,7 +363,6 @@ void CopyBufferToScreen(
 void CopyBufferToScreenVT(
 	CConsoleWindows* consoleWindow,
 	const ConsolePixel* buffer,
-	const int bufferLength,
 	const int width,
 	const int height,
 	const int left,
@@ -339,7 +370,6 @@ void CopyBufferToScreenVT(
 ) {
 	consoleWindow->CopyBufferToScreenVT(
 		buffer,
-		bufferLength,
 		width,
 		height,
 		left,

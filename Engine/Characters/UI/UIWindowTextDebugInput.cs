@@ -140,7 +140,12 @@ namespace Engine.Characters.UI
                     foreach (var state in inputState)
                     {
                         if (0 == state.Timestamp) continue;
-                        debugText.Add($"Value: {state.Value}, Sequence: {state.Sequence}, Offset: {state.Offset}, Timestamp: {state.Timestamp}");
+                        debugText.Add(
+                            $"Value: {state.Value}, " +
+                            $"Sequence: {state.Sequence}, " +
+                            $"Offset: {state.Offset}," +
+                            $" Timestamp: {state.Timestamp}"
+                        );
                     }
                 }
                 if (DeviceType.Mouse == deviceType)
@@ -151,7 +156,13 @@ namespace Engine.Characters.UI
                     foreach (var state in inputState)
                     {
                         if (0 == state.Timestamp) continue;
-                        debugText.Add($"Value: {state.Value}, Sequence: {state.Sequence}, Offset: {state.Offset}, IsButton: {state.IsButton} Timestamp: {state.Timestamp}");
+                        debugText.Add(
+                            $"Value: {state.Value}, " +
+                            $"Sequence: {state.Sequence}, " +
+                            $"Offset: {state.Offset}, " +
+                            $"IsButton: {state.IsButton} " +
+                            $"Timestamp: {state.Timestamp}"
+                        );
                     }
                 }
             }
