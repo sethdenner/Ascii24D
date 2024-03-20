@@ -13,6 +13,26 @@ namespace DirectInputDebugDemo
     /// </summary>
     internal class Program
     {
+        public enum PixelColorMode
+        { 
+            COLOR_MODE_4,
+            COLOR_MODE_24
+        }
+        public static PixelColorMode CurrentColorMode = PixelColorMode.COLOR_MODE_24;
+        public static Sprite<ConsolePixel> CreateFramebuffer(
+            int width,
+            int height,
+            int left,
+            int top
+        )
+        {
+            return new Sprite<ConsolePixel>(
+                width,
+                height,
+                left,
+                top
+            );
+        }
         /// <summary>
         /// Application entry point function.
         /// </summary>
@@ -43,9 +63,11 @@ namespace DirectInputDebugDemo
 
             Console.Clear();
 
-            Sprite framebuffer = new(
+            Sprite<ConsolePixel> framebuffer = CreateFramebuffer(
                 Native.WindowWidth,
-                Native.WindowHeight
+                Native.WindowHeight,
+                0,
+                0
             );
 
             CharacterFrameCounter fpsCounter = new CharacterFrameCounter();
@@ -76,7 +98,7 @@ namespace DirectInputDebugDemo
                 SMALL_RECT newWindowSize;
                 if (Native.HandleWindowResize(out newWindowSize))
                 {
-                    framebuffer = new Sprite(
+                    framebuffer = CreateFramebuffer(
                         newWindowSize.Right - newWindowSize.Left,
                         newWindowSize.Bottom - newWindowSize.Top,
                         newWindowSize.Left,
@@ -108,7 +130,7 @@ namespace DirectInputDebugDemo
                         fontWidth,
                         fontHeight
                     );
-                    framebuffer = new Sprite(
+                    framebuffer = CreateFramebuffer(
                        newWindowSize.Right - newWindowSize.Left,
                        newWindowSize.Bottom - newWindowSize.Top,
                        newWindowSize.Left,
@@ -116,9 +138,9 @@ namespace DirectInputDebugDemo
                    );
                 }
 
-                framebuffer += inputDebugWindow.Render();
+                framebuffer.MergeSprite(inputDebugWindow.Render());
                 framebuffer.EdgeBehavior = EdgeBehavior.WRAP;
-                framebuffer += fpsCounter.Sprites[0];
+                framebuffer.MergeSprite(fpsCounter.Sprites[0]);
                 framebuffer.EdgeBehavior = EdgeBehavior.CLAMP;
 
                 try
@@ -139,7 +161,7 @@ namespace DirectInputDebugDemo
                         fontWidth,
                         fontHeight
                     );
-                    framebuffer = new Sprite(
+                    framebuffer = CreateFramebuffer(
                         newWindowSize.Right - newWindowSize.Left,
                         newWindowSize.Bottom - newWindowSize.Top,
                         newWindowSize.Left,

@@ -64,7 +64,12 @@ namespace Engine.Characters
         {
             string fpsString = _fps.ToString() + "FPS";
 
-            Sprite sprite = new Sprite(fpsString.Length, 1, -fpsString.Length, 0);
+            Sprite<ConsolePixel> sprite = new Sprite<ConsolePixel>(
+                fpsString.Length,
+                1,
+                -fpsString.Length,
+                0
+            );
             for (int i = 0; i < fpsString.Length; ++i)
             {
 #if COLOR_MODE_4_BIT

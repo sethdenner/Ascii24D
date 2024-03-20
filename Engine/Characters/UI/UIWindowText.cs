@@ -36,7 +36,7 @@ namespace Engine.Characters.UI
             int windowPositionX = (int)Math.Floor(Position.X);
             int windowPositionY = (int)Math.Floor(Position.Y);
             base.GenerateSprites();
-            Sprite textSprite = new Sprite(
+            Sprite<ConsolePixel> textSprite = new Sprite<ConsolePixel>(
                 Width - PaddingRight - PaddingLeft - windowPositionX - BorderWidth,
                 Height - PaddingTop - PaddingBottom - windowPositionY - BorderWidth,
                 PaddingLeft + windowPositionX,
@@ -87,9 +87,9 @@ namespace Engine.Characters.UI
         /// 
         /// </summary>
         /// <returns></returns>
-        public override Sprite Render()
-        { 
-            Sprite baseSprite = base.Render();
+        public override Sprite<ConsolePixel> Render()
+        {
+            Sprite<ConsolePixel> baseSprite = base.Render();
             return baseSprite;
         }
         /// <summary>

@@ -1,20 +1,26 @@
 ﻿using Engine.Native;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Engine.Render
 {
     /// <summary>
     /// Enumeration used for specifying how to handle border overflow during
     /// <c>Sprite</c> addition.
-    /// </summary>
+    /// </summary>  
     public enum EdgeBehavior
     {
-        CLAMP = 0,
-        WRAP = 1
+        CLAMP,
+        WRAP
     }
     /// <summary>
-    /// A <c>Sprite</c> is a collection of BufferPixel objects meant to be
-    /// rendered to a console buffer as a square block of text and attributes.
-    /// </summary>
+    /// A <c>Sprite</c> is a collection of buffer pixels  meant to be rendered
+    /// to a console buffer as a square block of text and attributes.
+    /// <typeparam name="BufferPixelType"></typeparam>
+    /// </summary>    
     public class Sprite<BufferPixelType>
     {
         /// <summary>
@@ -56,45 +62,44 @@ namespace Engine.Render
         /// <param name="lhs"></param>
         /// <param name="rhs"></param>
         /// <returns></returns>
-        public static Sprite<BufferPixelType> operator +(
-            Sprite<BufferPixelType> lhs,
-            Sprite<BufferPixelType> rhs
+        public Sprite<BufferPixelType> MergeSprite(
+            Sprite<BufferPixelType> sprite
         )
         {
-            for (int y = 0; y < rhs.Height; ++y)
+            for (int y = 0; y < sprite.Height; ++y)
             {
-                for (int x = 0; x < rhs.Width; ++x)
+                for (int x = 0; x < sprite.Width; ++x)
                 {
-                    int xCoord = x + rhs.OffsetX;
-                    int yCoord = y + rhs.OffsetY;
+                    int xCoord = x + sprite.OffsetX;
+                    int yCoord = y + sprite.OffsetY;
                     if (
                         EdgeBehavior.CLAMP ==
-                        lhs.EdgeBehavior
+                        EdgeBehavior
                     )
                     {
                         // Handle clamping.
-                        if (xCoord >= lhs.Width || xCoord < 0) continue;
-                        if (yCoord >= lhs.Height || yCoord < 0) continue;
+                        if (xCoord >= Width || xCoord < 0) continue;
+                        if (yCoord >= Height || yCoord < 0) continue;
                     }
                     else if (
                         EdgeBehavior.WRAP ==
-                        lhs.EdgeBehavior
+                        EdgeBehavior
                     )
                     {
                         // Handle wrapping.
-                        if (xCoord >= lhs.Width || xCoord < 0) xCoord = (
-                            lhs.Width - Math.Abs(xCoord) % lhs.Width
+                        if (xCoord >= Width || xCoord < 0) xCoord = (
+                            Width - Math.Abs(xCoord) % Width
                         );
-                        if (yCoord >= lhs.Height || yCoord < 0) yCoord = (
-                            lhs.Height - Math.Abs(yCoord) % lhs.Height
+                        if (yCoord >= Height || yCoord < 0) yCoord = (
+                            Height - Math.Abs(yCoord) % Height
                         );
                     }
-                    int lhsBufferIndex = xCoord + yCoord * lhs.Width;
-                    int rhsBufferIndex = x + y * rhs.Width;
-                    lhs.BufferPixels[lhsBufferIndex] = rhs.BufferPixels[rhsBufferIndex];
+                    int lhsBufferIndex = xCoord + yCoord * Width;
+                    int rhsBufferIndex = x + y * sprite.Width;
+                    BufferPixels[lhsBufferIndex] = sprite.BufferPixels[rhsBufferIndex];
                 }
             }
-            return lhs;
+            return this;
         }
         /// <summary>
         /// 
@@ -140,6 +145,18 @@ namespace Engine.Render
 
             return true;
         }
+        public bool SetPixel(
+            int i,
+            BufferPixelType bufferPixel
+        )
+        {
+            if (i < 0 || i >= BufferPixels.Length)
+                return false;
+
+            BufferPixels[i] = bufferPixel;
+
+            return true;
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -150,53 +167,6 @@ namespace Engine.Render
             {
                 BufferPixels[i] = bufferPixel;
             }
-        }
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    public class Sprite : Sprite<ConsolePixel>
-    {
-        /// <summary>
-        /// <c>Sprite</c> default constructor.
-        /// </summary>
-        public Sprite() : base()
-        { }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="offsetX"></param>
-        /// <param name="offsetY"></param>
-        /// <param name="edgeBehavior"></param>
-        public Sprite(
-            int width,
-            int height,
-            int offsetX = 0,
-            int offsetY = 0,
-            EdgeBehavior edgeBehavior = EdgeBehavior.CLAMP
-        ) : base(
-            width,
-            height,
-            offsetX,
-            offsetY,
-            edgeBehavior
-        ) { }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="lhs"></param>
-        /// <param name="rhs"></param>
-        /// <returns></returns>
-        public static Sprite operator +(
-            Sprite lhs,
-            Sprite rhs
-        )
-        {
-            return (Sprite)(
-                (Sprite<ConsolePixel>)lhs + (Sprite<ConsolePixel>)rhs
-            );
         }
     }
 }

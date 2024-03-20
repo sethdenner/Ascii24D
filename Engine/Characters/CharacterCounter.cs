@@ -46,7 +46,7 @@ namespace Engine.Characters
             // Convert the counter to a string.
             string countString = _count.ToString();
             // Intitialize a sprite with the proper dimensions.
-            Sprite sprite = new Sprite(countString.Length, 1);
+            Sprite<ConsolePixel> sprite = new Sprite<ConsolePixel>(countString.Length, 1);
             // Iterate over the counter string.
             for (int i = 0; i < countString.Length; ++i)
             {
@@ -60,13 +60,13 @@ namespace Engine.Characters
                     Attributes = 0x00F0
                 };
 #elif COLOR_MODE_24_BIT
-                sprite.BufferPixels[i] = new ConsolePixel{
+                sprite.SetPixel(i, new ConsolePixel{
                     ForegroundColor = new Native.ConsoleColor() { },
                     BackgroundColor = new Native.ConsoleColor() {
                         R = (byte)255, G = (byte)255, B = (byte)255
                     },
                     CharacterCode = (byte)countString[i]
-                };
+                });
 #endif
             }
             // Clear any previous sprites.

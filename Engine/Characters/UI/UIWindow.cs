@@ -381,8 +381,8 @@ namespace Engine.Characters.UI
         /// 
         /// </summary>
         public override void GenerateSprites()
-        { 
-            Sprite windowSprite = new Sprite(
+        {
+            Sprite<ConsolePixel> windowSprite = new Sprite<ConsolePixel>(
                 Width,
                 Height
             );
