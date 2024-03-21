@@ -36,17 +36,17 @@ namespace Engine.Characters.UI
             int windowPositionX = (int)Math.Floor(Position.X);
             int windowPositionY = (int)Math.Floor(Position.Y);
             base.GenerateSprites();
-            Sprite<ConsolePixel> textSprite = new Sprite<ConsolePixel>(
+            Sprite textSprite = new(
                 Width - PaddingRight - PaddingLeft - windowPositionX - BorderWidth,
                 Height - PaddingTop - PaddingBottom - windowPositionY - BorderWidth,
                 PaddingLeft + windowPositionX,
                 PaddingTop + windowPositionY
             );
-            textSprite.Fill(new ConsolePixel() {
-                ForegroundColor = ForegroundColor,
-                BackgroundColor = BackgroundColor,
-                CharacterCode = (byte)' '
-            });
+            textSprite.Fill(new Pixel(
+                ForegroundColor,
+                BackgroundColor,
+                (byte)' '
+            ));
 
             int newLineCount = 0;
             int newLineIndexOffset = 0;
@@ -73,11 +73,11 @@ namespace Engine.Characters.UI
                 textSprite.SetPixel(
                     x,
                     y,
-                    new ConsolePixel() {
-                        ForegroundColor = ForegroundColor,
-                        BackgroundColor = BackgroundColor,
-                        CharacterCode = (byte)Text[i]
-                    }
+                    new Pixel(
+                        ForegroundColor,
+                        BackgroundColor,
+                        (byte)Text[i]
+                    )
                 );
             }
 
@@ -87,9 +87,9 @@ namespace Engine.Characters.UI
         /// 
         /// </summary>
         /// <returns></returns>
-        public override Sprite<ConsolePixel> Render()
+        public override Sprite Render()
         {
-            Sprite<ConsolePixel> baseSprite = base.Render();
+            Sprite baseSprite = base.Render();
             return baseSprite;
         }
         /// <summary>

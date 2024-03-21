@@ -1,27 +1,20 @@
 ﻿using System.Diagnostics;
-using SharpDX.DirectInput;
-using Engine.Input;
-using Engine.Characters;
-using Engine.Characters.UI;
-using Engine.Render;
 using Engine.Native;
+using Engine.Input;
+using Engine.Render;
+using Engine.Characters;
+using Engine.Core;
+using Engine.Characters.UI;
+using SharpDX.DirectInput;
 
-namespace DirectInputDebugDemo
+
+namespace MapDemo
 {
     /// <summary>
     /// Program entry point class.
     /// </summary>
     internal class Program
     {
-        public enum PixelColorMode
-        { 
-            COLOR_MODE_4,
-            COLOR_MODE_24
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public static PixelColorMode CurrentColorMode = PixelColorMode.COLOR_MODE_24;
         /// <summary>
         /// 
         /// </summary>
@@ -43,6 +36,21 @@ namespace DirectInputDebugDemo
                 left,
                 top
             );
+        }
+        public static Sprite ResizeWindow(SMALL_RECT newWindowSize)
+        {
+            Native.InitalizeSurface(
+               newWindowSize.Right - newWindowSize.Left,
+               newWindowSize.Bottom - newWindowSize.Top,
+               12,
+               12
+           );
+            return CreateFramebuffer(
+               newWindowSize.Right - newWindowSize.Left,
+               newWindowSize.Bottom - newWindowSize.Top,
+               newWindowSize.Left,
+               newWindowSize.Top
+           );
         }
         /// <summary>
         /// Application entry point function.
@@ -81,11 +89,9 @@ namespace DirectInputDebugDemo
                 0
             );
 
+            Map demoMap = new Map();
             CharacterFrameCounter fpsCounter = new CharacterFrameCounter();
-            UIWindowTextDebugInput inputDebugWindow = (
-                new UIWindowTextDebugInput(input)
-            );
-
+            demoMap.AddCharacter(fpsCounter);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             long frameStartTime = stopwatch.ElapsedTicks;
@@ -101,63 +107,44 @@ namespace DirectInputDebugDemo
 
                 input.Update();
                 Native.UpdateConsoleTitle(elapsedSeconds);
-
-                inputDebugWindow.Update(elapsedSeconds);
                 fpsCounter.Update(elapsedSeconds);
                 fpsCounter.GenerateSprites();
 
                 SMALL_RECT newWindowSize;
                 if (Native.HandleWindowResize(out newWindowSize))
                 {
-                    framebuffer = CreateFramebuffer(
-                        newWindowSize.Right - newWindowSize.Left,
-                        newWindowSize.Bottom - newWindowSize.Top,
-                        newWindowSize.Left,
-                        newWindowSize.Top
-                    );
+                    framebuffer = ResizeWindow(newWindowSize);
                 }
 
                 try
                 {
-                    framebuffer.Fill(new ConsolePixel() {
-                        ForegroundColor = new Engine.Native.ConsoleColor() {
+                    framebuffer.Fill(new Pixel(
+                        new Engine.Native.ConsoleColor()
+                        {
                             R = (byte)255,
                             G = (byte)0,
                             B = (byte)0
                         },
-                        BackgroundColor = new Engine.Native.ConsoleColor() {
+                        new Engine.Native.ConsoleColor()
+                        {
                             R = (byte)255,
                             G = (byte)0,
                             B = (byte)0
                         },
-                        CharacterCode = (byte)' '
-                    });
+                        (byte)' '
+                    ));
                 }
                 catch (System.IndexOutOfRangeException)
                 {
-                    Native.InitalizeSurface(
-                        Native.WindowWidth,
-                        Native.WindowHeight,
-                        fontWidth,
-                        fontHeight
-                    );
-                    framebuffer = CreateFramebuffer(
-                       newWindowSize.Right - newWindowSize.Left,
-                       newWindowSize.Bottom - newWindowSize.Top,
-                       newWindowSize.Left,
-                       newWindowSize.Top
-                   );
+                    framebuffer = ResizeWindow(newWindowSize);
                 }
 
-                framebuffer.MergeSprite(inputDebugWindow.Render());
-                framebuffer.EdgeBehavior = EdgeBehavior.WRAP;
-                framebuffer.MergeSprite(fpsCounter.Sprites[0]);
-                framebuffer.EdgeBehavior = EdgeBehavior.CLAMP;
+                demoMap.Render(framebuffer);
 
                 try
                 {
                     Native.CopyBufferToScreenVT(
-                        framebuffer.BufferPixels,
+                        framebuffer.GetNativePixelBuffer(),
                         framebuffer.Width,
                         framebuffer.Height,
                         framebuffer.OffsetX,
@@ -166,18 +153,7 @@ namespace DirectInputDebugDemo
                 }
                 catch (System.IndexOutOfRangeException)
                 {
-                    Native.InitalizeSurface(
-                        Native.WindowWidth,
-                        Native.WindowHeight,
-                        fontWidth,
-                        fontHeight
-                    );
-                    framebuffer = CreateFramebuffer(
-                        newWindowSize.Right - newWindowSize.Left,
-                        newWindowSize.Bottom - newWindowSize.Top,
-                        newWindowSize.Left,
-                        newWindowSize.Top
-                    );
+                    framebuffer = ResizeWindow(newWindowSize);
                 }
             } while (true);
         }

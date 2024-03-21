@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,9 +20,8 @@ namespace Engine.Render
     /// <summary>
     /// A <c>Sprite</c> is a collection of buffer pixels  meant to be rendered
     /// to a console buffer as a square block of text and attributes.
-    /// <typeparam name="BufferPixelType"></typeparam>
     /// </summary>    
-    public class Sprite<BufferPixelType>
+    public class Sprite
     {
         /// <summary>
         /// <c>Sprite</c> default constructor.
@@ -53,7 +53,7 @@ namespace Engine.Render
             Height = height;
             OffsetX = offsetX;
             OffsetY = offsetY;
-            BufferPixels = new BufferPixelType[width * height];
+            BufferPixels = new Pixel[width * height];
             EdgeBehavior = edgeBehavior;
         }
         /// <summary>
@@ -62,8 +62,8 @@ namespace Engine.Render
         /// <param name="lhs"></param>
         /// <param name="rhs"></param>
         /// <returns></returns>
-        public Sprite<BufferPixelType> MergeSprite(
-            Sprite<BufferPixelType> sprite
+        public Sprite MergeSprite(
+            Sprite sprite
         )
         {
             for (int y = 0; y < sprite.Height; ++y)
@@ -74,7 +74,7 @@ namespace Engine.Render
                     int yCoord = y + sprite.OffsetY;
                     if (
                         EdgeBehavior.CLAMP ==
-                        EdgeBehavior
+                        sprite.EdgeBehavior
                     )
                     {
                         // Handle clamping.
@@ -83,15 +83,15 @@ namespace Engine.Render
                     }
                     else if (
                         EdgeBehavior.WRAP ==
-                        EdgeBehavior
+                        sprite.EdgeBehavior
                     )
                     {
                         // Handle wrapping.
                         if (xCoord >= Width || xCoord < 0) xCoord = (
-                            Width - Math.Abs(xCoord) % Width
+                            (Width - Math.Abs(xCoord)) % Width
                         );
                         if (yCoord >= Height || yCoord < 0) yCoord = (
-                            Height - Math.Abs(yCoord) % Height
+                            (Height - Math.Abs(yCoord)) % Height
                         );
                     }
                     int lhsBufferIndex = xCoord + yCoord * Width;
@@ -99,12 +99,31 @@ namespace Engine.Render
                     BufferPixels[lhsBufferIndex] = sprite.BufferPixels[rhsBufferIndex];
                 }
             }
+            OffsetX = sprite.OffsetX;
+            OffsetY = sprite.OffsetY;
             return this;
         }
         /// <summary>
         /// 
         /// </summary>
-        public BufferPixelType[] BufferPixels { get; }
+        /// <param name="lhs"></param>
+        /// <param name="rhs"></param>
+        /// <returns></returns>
+        public static Sprite operator +(Sprite lhs, Sprite rhs)
+        {
+            Sprite mergedSprite = new Sprite(
+                int.Max(lhs.Width, rhs.Width + rhs.OffsetX),
+                int.Max(lhs.Height, rhs.Height + rhs.OffsetY),
+                lhs.OffsetX, lhs.OffsetY
+            );
+            mergedSprite.MergeSprite(lhs);
+            mergedSprite.MergeSprite(rhs);
+            return mergedSprite;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public Pixel[] BufferPixels { get; }
         /// <summary>
         /// 
         /// </summary>
@@ -135,7 +154,7 @@ namespace Engine.Render
         public bool SetPixel(
             int x,
             int y,
-            BufferPixelType bufferPixel
+            Pixel bufferPixel
         )
         {
             if (Width <= x || 0 > x || Height <= y || 0 > y)
@@ -147,7 +166,7 @@ namespace Engine.Render
         }
         public bool SetPixel(
             int i,
-            BufferPixelType bufferPixel
+            Pixel bufferPixel
         )
         {
             if (i < 0 || i >= BufferPixels.Length)
@@ -161,12 +180,21 @@ namespace Engine.Render
         /// 
         /// </summary>
         /// <param name="charInfo"></param>
-        public void Fill(BufferPixelType bufferPixel)
+        public void Fill(Pixel bufferPixel)
         {
             for (var i = 0; i < BufferPixels.Length; ++i)
             {
                 BufferPixels[i] = bufferPixel;
             }
+        }
+        public ConsolePixel[] GetNativePixelBuffer()
+        {
+            ConsolePixel[] buffer = new ConsolePixel[BufferPixels.Length];
+            for (int i = 0; i < BufferPixels.Length; ++i)
+            {
+                buffer[i] = BufferPixels[i].PixelDescription;
+            }
+            return buffer;
         }
     }
 }

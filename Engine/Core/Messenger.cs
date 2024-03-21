@@ -20,14 +20,10 @@
             ) as T;
         }
 
-        public static T Trigger
+        public static T? Trigger
         {
             get
             {
-                if (null == _handle)
-                    throw new InvalidOperationException(
-                        nameof(_handle) + " is null."
-                    );
                 return _handle;
             }
         }

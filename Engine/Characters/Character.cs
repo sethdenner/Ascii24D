@@ -18,7 +18,7 @@ namespace Engine.Characters
         public Character() : base()
         {
             // Initialize the _sprites List to empty.
-            _sprites = new List<Sprite<ConsolePixel>>();
+            _sprites = new List<Sprite>();
         }
         /// <summary>
         /// The <c>Render</c> method compiles all of the elements
@@ -28,7 +28,7 @@ namespace Engine.Characters
         /// Retuns an instance of <c>Sprite</c> representing the
         /// final compiled sprite.
         /// </returns>
-        public virtual Sprite<ConsolePixel> Render()
+        public virtual Sprite Render()
         {
             GenerateSprites();
             // Calculate the total width and height.
@@ -36,18 +36,18 @@ namespace Engine.Characters
             int height = 0;
             for (int i = 0; i < Sprites.Count; ++i)
             {
-                Sprite<ConsolePixel> sprite = Sprites[i];
-                int newWidth = sprite.Width + sprite.OffsetX;
+                Sprite sprite = Sprites[i];
+                int newWidth = sprite.Width;
                 if (width < newWidth)
                     width = newWidth;
 
-                int newHeight = sprite.Height + sprite.OffsetY;
+                int newHeight = sprite.Height;
                 if (height < newHeight)
                     height = newHeight;
             }
 
             // Composite all the sprites.
-            Sprite<ConsolePixel> finalSprite = new Sprite<ConsolePixel>(
+            Sprite finalSprite = new Sprite(
                 width,
                 height,
                 (int)Math.Floor(Position.X),
@@ -55,7 +55,9 @@ namespace Engine.Characters
             );
             for (int i = 0; i < Sprites.Count; ++i)
             {
-                finalSprite.MergeSprite(Sprites[i]);
+                Sprite sprite = Sprites[i];
+                finalSprite.EdgeBehavior = sprite.EdgeBehavior;
+                finalSprite.MergeSprite(sprite);
             }
 
             // Composite child UI elements.
@@ -86,15 +88,17 @@ namespace Engine.Characters
         /// <c>_sprites</c> is a <c>List</c> collection of <c>Sprite</c> objects
         /// that comprise the character.
         /// </summary>
-        protected List<Sprite<ConsolePixel>> _sprites;
+        protected List<Sprite> _sprites;
         /// <summary>
         /// <c>Sprties</c> is a property that publicly exposes the <c>_sprites</c> <c>List</c>.
         /// </summary>
-        public  List<Sprite<ConsolePixel>> Sprites { get { return _sprites; } }
+        public  List<Sprite> Sprites { get { return _sprites; } }
         /// <summary>
         /// 
         /// </summary>
         public Vector2 Position { get; set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
     }
 }

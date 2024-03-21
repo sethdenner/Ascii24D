@@ -127,7 +127,9 @@ namespace Engine.Input
                     MouseUpdate[] updates = mouseDevice.GetUpdates();
                     foreach (var update in updates)
                     {
-                        Messenger<MouseMessage>.Trigger(device, update);
+                        MouseMessage? handler = Messenger<MouseMessage>.Trigger;
+                        if (null != handler)
+                            handler(device, update);
                     }
                 }
                 else if (DeviceType.Keyboard == deviceType)
@@ -136,7 +138,9 @@ namespace Engine.Input
                     KeyboardUpdate[] updates = keyboardDevice.GetUpdates();
                     foreach (var update in updates)
                     {
-                        Messenger<KeyboardMessage>.Trigger(device, update);
+                        KeyboardMessage? handler = Messenger<KeyboardMessage>.Trigger;
+                        if (null != handler)
+                            handler(device, update);
                     }
                 }
                 else if (
@@ -148,7 +152,9 @@ namespace Engine.Input
                     JoystickUpdate[] updates = joystickDevice.GetUpdates();
                     foreach (var update in updates)
                     {
-                        Messenger<JoystickMessage>.Trigger(device, update);
+                        JoystickMessage? handler = Messenger<JoystickMessage>.Trigger;
+                        if (null != handler)
+                            handler(device, update);
                     }
                 }
             }
