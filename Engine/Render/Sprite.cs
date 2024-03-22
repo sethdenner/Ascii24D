@@ -57,6 +57,43 @@ namespace Engine.Render
             EdgeBehavior = edgeBehavior;
         }
         /// <summary>
+        /// <c>DepthTest</c> method checks the <c>PixelDepth</c> of the
+        /// <c>Pixel</c> in the <c>Sprite</c> a position (x, y) against the
+        /// provided depth value.
+        /// </summary>
+        /// <param name="x">
+        /// The position on the <c>Sprite</c> in the x axis.
+        /// </param>
+        /// <param name="y">
+        /// The position on the <c>Sprite</c> in the y axis.
+        /// </param>
+        /// <param name="depth"></param>
+        /// The depth value to test against the current pixel at position
+        /// (x, y).
+        /// <returns>
+        /// Returns <c>true</c> if <paramref name="depth"/> is greater than the
+        /// current <c>PixelDepth</c> at position (x, y). Otherwise <c>false</c>
+        /// is returned.
+        /// </returns>
+        public bool DepthTest(
+            int x,
+            int y,
+            int depth
+        )
+        {
+            if (
+                depth >=
+                BufferPixels[x + (y * Width)].PixelDepth
+            )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="lhs"></param>
@@ -94,9 +131,11 @@ namespace Engine.Render
                             (Height - Math.Abs(yCoord)) % Height
                         );
                     }
-                    int lhsBufferIndex = xCoord + yCoord * Width;
                     int rhsBufferIndex = x + y * sprite.Width;
-                    BufferPixels[lhsBufferIndex] = sprite.BufferPixels[rhsBufferIndex];
+                    int lhsBufferIndex = xCoord + yCoord * Width;
+                    Pixel rhsPixel = sprite.BufferPixels[rhsBufferIndex];
+                    DepthTest(xCoord, yCoord, rhsPixel.PixelDepth);
+                    BufferPixels[lhsBufferIndex] = rhsPixel;
                 }
             }
             OffsetX = sprite.OffsetX;
@@ -160,6 +199,9 @@ namespace Engine.Render
             if (Width <= x || 0 > x || Height <= y || 0 > y)
                 return false;
 
+            if (!DepthTest(x, y, bufferPixel.PixelDepth))
+                return false;
+
             BufferPixels[x + y * Width] = bufferPixel;
 
             return true;
@@ -170,6 +212,10 @@ namespace Engine.Render
         )
         {
             if (i < 0 || i >= BufferPixels.Length)
+                return false;
+
+            // Pass in i as x and 0 as y. Math works out.
+            if (!DepthTest(i, 0, bufferPixel.PixelDepth))
                 return false;
 
             BufferPixels[i] = bufferPixel;

@@ -34,16 +34,23 @@ namespace Engine.Characters.UI
         /// The position of the user interface relative to the top left corner of the parent
         /// <c>UIWindow</c> or to the to left corner of the screen in screen pixels. 
         /// </param>
-        public UIWindow(int width, int height, Vector2 position) : base() 
+        public UIWindow(
+            int width,
+            int height,
+            Vector3 position
+        ) : base() 
         {
-            Pixel backgroundPixel = new Pixel(
+            int depth = (int)Math.Floor(position.Z);
+            Pixel backgroundPixel = PixelManager.CreatePixel(
                 new Native.ConsoleColor() { },
                 new Native.ConsoleColor() {
                     R = (byte)255, G = (byte)255, B = (byte)255
                 },
-                (byte)' '
+                (byte)' ',
+                depth
+
             );
-            Pixel borderPixel = new Pixel(
+            Pixel borderPixel = PixelManager.CreatePixel(
                 new Native.ConsoleColor()
                 {
                     R = (byte)125,
@@ -56,7 +63,8 @@ namespace Engine.Characters.UI
                     G = (byte)50,
                     B = (byte)50
                 },
-                (byte)'#'
+                (byte)'#',
+                depth
             );
             InitializeUIWindow(
                 width,
@@ -114,7 +122,7 @@ namespace Engine.Characters.UI
         public UIWindow(
             int width,
             int height,
-            Vector2 position,
+            Vector3 position,
             Pixel backgroundPixel,
             Pixel borderPixel,
             int borderWidth,
@@ -186,7 +194,7 @@ namespace Engine.Characters.UI
         private void InitializeUIWindow(
             int width,
             int height,
-            Vector2 position,
+            Vector3 position,
             Pixel backgroundPixel,
             Pixel borderPixel,
             int borderWidth,
@@ -217,7 +225,9 @@ namespace Engine.Characters.UI
         {
             Sprite windowSprite = new Sprite(
                 Width,
-                Height
+                Height,
+                (int)Math.Floor(Position.X),
+                (int)Math.Floor(Position.Y)
             );
             for (int i = 0; i < windowSprite.BufferPixels.Length; ++i)
             {
@@ -251,9 +261,10 @@ namespace Engine.Characters.UI
                 window.Height = Height - (2 * BorderWidth) - PaddingTop - PaddingBottom;
             }
 
-            window.Position = new Vector2(
+            window.Position = new Vector3(
                 window.Position.X + BorderWidth,
-                window.Position.Y + BorderWidth
+                window.Position.Y + BorderWidth,
+                (int)Math.Floor(Position.Z + 1)
             );
 
             AddChild(window);

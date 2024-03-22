@@ -15,20 +15,24 @@ namespace Engine.Render
         public Pixel()
         {
             PixelDescription = new ConsolePixel() { };
+            PixelDepth = 0;
         }
         public Pixel(
             Native.ConsoleColor foregroundColor,
             Native.ConsoleColor backgroundColor,
-            byte Character
+            byte character,
+            int depth
         )
         {
             PixelDescription = new ConsolePixel()
             {
                 ForegroundColor = foregroundColor,
                 BackgroundColor = backgroundColor,
-                CharacterCode = Character
+                CharacterCode = character
             };
+            PixelDepth = depth;
         }
         public ConsolePixel PixelDescription { get; set; }
+        public int PixelDepth { get; set; }
     }
 }

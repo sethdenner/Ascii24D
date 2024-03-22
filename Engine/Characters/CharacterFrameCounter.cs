@@ -73,12 +73,13 @@ namespace Engine.Characters
             sprite.EdgeBehavior = EdgeBehavior.WRAP;
             for (int i = 0; i < fpsString.Length; ++i)
             {
-                sprite.BufferPixels[i] = new Pixel(
+                sprite.BufferPixels[i] = PixelManager.CreatePixel(
                     new Native.ConsoleColor() { },
                     new Native.ConsoleColor() {
                         R = (byte)200, G = (byte)200, B = (byte)200
                     },
-                    (byte)fpsString[i]
+                    (byte)fpsString[i],
+                    (int)Math.Floor(Position.Z)
                 );
             }
             Sprites.Clear();

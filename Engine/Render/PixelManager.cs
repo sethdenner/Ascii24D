@@ -26,19 +26,24 @@ namespace Engine.Render
         public static Pixel CreatePixel(
             Native.ConsoleColor foregroundColor,
             Native.ConsoleColor backgroundColor,
-            byte character
+            byte character,
+            int depth
         )
         {
-            int key = foregroundColor.R + foregroundColor.G + foregroundColor.B +
-                backgroundColor.R + backgroundColor.G + backgroundColor.B +
-                character;
+            // I don't like that depth is part of the key here but we're just
+            // going to roll with it for now. We will come back and optimize
+            // this if needed (so probably never).
+            int key = foregroundColor.R + foregroundColor.G +
+                foregroundColor.B + backgroundColor.R + backgroundColor.G +
+                backgroundColor.B + character + depth;
 
             if (!PixelMap.ContainsKey(key))
             {
                 Pixels[PixelCount] = new Pixel(
                     foregroundColor,
                     backgroundColor,
-                    character
+                    character,
+                    depth
                 );
                 PixelMap[key] = PixelCount;
                 ++PixelCount;

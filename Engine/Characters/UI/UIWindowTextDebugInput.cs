@@ -87,7 +87,7 @@ namespace Engine.Characters.UI
         public UIWindowTextDebugInput(Input.Input input) : base(
             Native.Native.WindowWidth - 2,
             Native.Native.WindowHeight - 2,
-            new Vector2(1, 1)
+            new Vector3(1, 1, 10000)
         )
         {
             _input = input;
@@ -166,9 +166,10 @@ namespace Engine.Characters.UI
                     }
                 }
             }
+            // WTH? Should the position and what not be updated every frame?
             Width = Native.Native.WindowWidth - 2;
             Height = Native.Native.WindowHeight - 2;
-            Position = new Vector2() { X = 1, Y = 1 };
+            Position = new Vector3() { X = 1, Y = 1 };
             Text = string.Join("\n", debugText.ToArray());
         }
         /// <summary>

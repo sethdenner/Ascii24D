@@ -116,7 +116,7 @@ namespace DirectInputDebugDemo
 
                 try
                 {
-                    framebuffer.Fill(new Pixel(
+                    framebuffer.Fill(PixelManager.CreatePixel(
                         new Engine.Native.ConsoleColor() {
                             R = (byte)255,
                             G = (byte)0,
@@ -127,7 +127,8 @@ namespace DirectInputDebugDemo
                             G = (byte)0,
                             B = (byte)0
                         },
-                        (byte)' '
+                        (byte)' ',
+                        0
                     ));
                 }
                 catch (System.IndexOutOfRangeException)
@@ -135,10 +136,7 @@ namespace DirectInputDebugDemo
                     framebuffer = ResizeWindow(newWindowSize);
                 }
 
-                framebuffer.MergeSprite(inputDebugWindow.Render());
-                framebuffer.EdgeBehavior = EdgeBehavior.WRAP;
-                framebuffer.MergeSprite(fpsCounter.Sprites[0]);
-                framebuffer.EdgeBehavior = EdgeBehavior.CLAMP;
+                demoMap.Render(framebuffer);
 
                 try
                 {

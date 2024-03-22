@@ -16,17 +16,18 @@ namespace Engine.Characters.UI
         /// <param name="height"></param>
         /// <param name="position"></param>
         /// <param name="windowText"></param>
-        public UIWindowText(int width, int height, Vector2 position, string windowText = "") : base(width, height, position)
+        public UIWindowText(
+            int width,
+            int height,
+            Vector3 position,
+            string windowText = ""
+        ) : base(width, height, position)
         {
             Text = windowText;
-#if COLOR_MODE_4_BIT
-            CharAttributes = CHAR_INFO_ATTRIBUTE.FG_WHITE | CHAR_INFO_ATTRIBUTE.BG_BLACK;
-#elif COLOR_MODE_24_BIT
             BackgroundColor = new Native.ConsoleColor() { };
             ForegroundColor = new Native.ConsoleColor() { 
                 R = 255, G = 255, B = 255 
             };
-#endif
         }
         /// <summary>
         /// 
@@ -39,13 +40,14 @@ namespace Engine.Characters.UI
             Sprite textSprite = new(
                 Width - PaddingRight - PaddingLeft - windowPositionX - BorderWidth,
                 Height - PaddingTop - PaddingBottom - windowPositionY - BorderWidth,
-                PaddingLeft + windowPositionX,
-                PaddingTop + windowPositionY
+                PaddingLeft + windowPositionX + BorderWidth,
+                PaddingTop + windowPositionY + BorderWidth
             );
-            textSprite.Fill(new Pixel(
+            textSprite.Fill(PixelManager.CreatePixel(
                 ForegroundColor,
                 BackgroundColor,
-                (byte)' '
+                (byte)' ',
+                (int)Math.Floor(Position.Z) + 1
             ));
 
             int newLineCount = 0;
@@ -73,10 +75,11 @@ namespace Engine.Characters.UI
                 textSprite.SetPixel(
                     x,
                     y,
-                    new Pixel(
+                    PixelManager.CreatePixel(
                         ForegroundColor,
                         BackgroundColor,
-                        (byte)Text[i]
+                        (byte)Text[i],
+                        (int)Math.Floor(Position.Z) + 1
                     )
                 );
             }
@@ -87,10 +90,9 @@ namespace Engine.Characters.UI
         /// 
         /// </summary>
         /// <returns></returns>
-        public override Sprite Render()
+        public override void Render(Sprite renderTarget)
         {
-            Sprite baseSprite = base.Render();
-            return baseSprite;
+            base.Render(renderTarget);
         }
         /// <summary>
         /// 

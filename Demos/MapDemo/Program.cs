@@ -118,7 +118,7 @@ namespace MapDemo
 
                 try
                 {
-                    framebuffer.Fill(new Pixel(
+                    framebuffer.Fill(PixelManager.CreatePixel(
                         new Engine.Native.ConsoleColor()
                         {
                             R = (byte)255,
@@ -131,7 +131,8 @@ namespace MapDemo
                             G = (byte)0,
                             B = (byte)0
                         },
-                        (byte)' '
+                        (byte)' ',
+                        int.MinValue
                     ));
                 }
                 catch (System.IndexOutOfRangeException)

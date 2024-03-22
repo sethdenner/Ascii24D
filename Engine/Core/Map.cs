@@ -37,7 +37,7 @@ namespace Engine.Core
         {
             foreach (var character in Characters)
             {
-                framebuffer.MergeSprite(character.Render());
+                character.Render(framebuffer);
             }
         }
         /// <summary>

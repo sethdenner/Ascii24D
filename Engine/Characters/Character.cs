@@ -28,8 +28,14 @@ namespace Engine.Characters
         /// Retuns an instance of <c>Sprite</c> representing the
         /// final compiled sprite.
         /// </returns>
-        public virtual Sprite Render()
+        public virtual void Render(Sprite renderTarget)
         {
+            // Composite child UI elements.
+            for (int i = 0; i < Children.Count; ++i)
+            {
+                Character child = (Character)Children[i];
+                child.Render(renderTarget);
+            }
             GenerateSprites();
             // Calculate the total width and height.
             int width = 0;
@@ -45,30 +51,17 @@ namespace Engine.Characters
                 if (height < newHeight)
                     height = newHeight;
             }
-
             // Composite all the sprites.
-            Sprite finalSprite = new Sprite(
-                width,
-                height,
-                (int)Math.Floor(Position.X),
-                (int)Math.Floor(Position.Y)
-            );
             for (int i = 0; i < Sprites.Count; ++i)
             {
                 Sprite sprite = Sprites[i];
-                finalSprite.EdgeBehavior = sprite.EdgeBehavior;
-                finalSprite.MergeSprite(sprite);
+                // What the heck am I even doing with EdgeBehavior here?
+                // Is this really correct?
+                EdgeBehavior pushedBehavior = renderTarget.EdgeBehavior;
+                renderTarget.EdgeBehavior = sprite.EdgeBehavior;
+                renderTarget.MergeSprite(sprite);
+                renderTarget.EdgeBehavior = pushedBehavior;
             }
-
-            // Composite child UI elements.
-            for (int i = 0; i < Children.Count; ++i)
-            {
-                Character child = (Character)Children[i];
-                finalSprite.MergeSprite(child.Render());
-            }
-
-            // Return composited sprite.
-            return finalSprite;
         }
         /// <summary>
         /// <c>RegisterInputHandlers</c> override this method to register
@@ -96,7 +89,7 @@ namespace Engine.Characters
         /// <summary>
         /// 
         /// </summary>
-        public Vector2 Position { get; set; }
+        public Vector3 Position { get; set; }
         /// <summary>
         /// 
         /// </summary>

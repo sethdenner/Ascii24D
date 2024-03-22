@@ -55,7 +55,8 @@ namespace Engine.Characters
                     new Native.ConsoleColor() {
                         R = (byte)255, G = (byte)255, B = (byte)255
                     },
-                    (byte)countString[i]
+                    (byte)countString[i],
+                    0
                 ));
             }
             // Clear any previous sprites.
