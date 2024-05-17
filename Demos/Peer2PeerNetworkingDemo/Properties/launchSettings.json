@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Peer2PeerNetworkingDemo": {
+      "commandName": "Project",
+      "commandLineArgs": "-d"
+    }
+  }
+}
