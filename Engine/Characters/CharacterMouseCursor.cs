@@ -32,19 +32,22 @@ namespace Engine.Characters
         /// <summary>
         /// <c>HandleMouseMessage</c> Callback function for <c>MouseMessage</c>.
         /// Defines default behavior for updating mouse position. The default
-        /// behavior is as you would expect. Moving the mouse in the X-axis updates
-        /// the X position and moving the mouse in the Y-axis updates the Y position. 
+        /// behavior is as you would expect. Moving the mouse in the X-axis
+        /// updates the X position and moving the mouse in the Y-axis updates
+        /// the Y position. 
         /// </summary>
         /// <param name="device">
-        /// A reference to an <c>IInputDevice</c> implementing instance representing
-        /// the device that generated the message.
+        /// A reference to an <c>IInputDevice</c> implementing instance
+        /// representing the device that generated the message.
         /// </param>
         /// <param name="update">
-        /// A reference to a <c>SharpDX.DirectInput.MouseUpdate</c> instance containing
-        /// information about the mouse device state change.
+        /// A reference to a <c>SharpDX.DirectInput.MouseUpdate</c> instance
+        /// containing information about the mouse device state change.
         /// </param>
-        public virtual void HandleMouseMessage(IInputDevice device, MouseUpdate update)
-        {
+        public virtual void HandleMouseMessage(
+            InputDevice device,
+            MouseUpdate update
+        ) {
             if (update.Offset == MouseOffset.X)
             {
                 MousePosition = new Vector2(
@@ -61,15 +64,16 @@ namespace Engine.Characters
             }
         }
         /// <summary>
-        /// <c>RegisterInputHandlers</c> registers the HandleMouseMessage callback to <c>MouseMessage</c>
+        /// <c>RegisterInputHandlers</c> registers the HandleMouseMessage
+        /// callback to <c>MouseMessage</c>
         /// </summary>
         public override void RegisterInputHandlers()
         {
-            Messenger<Input.Input.MouseMessage>.Register(HandleMouseMessage);
+            Messenger<MouseMessage>.Register(HandleMouseMessage);
         }
         /// <summary>
-        /// <c>CenterMousePosition</c> sets <c>MousePosition</c> to the center of the screen
-        /// according to the current <c>ScreenDimensions</c>.
+        /// <c>CenterMousePosition</c> sets <c>MousePosition</c> to the center
+        /// of the screen according to the current <c>ScreenDimensions</c>.
         /// </summary>
         public virtual void CenterMousePosition()
         {
@@ -85,12 +89,14 @@ namespace Engine.Characters
         public Vector2 MousePosition { get; set; }
         /// <summary>
         /// <c>MouseMovementScale</c> property stores and retrieves the scale
-        /// mouse movement should be multiplied by. Could also be called "sensitivity".
+        /// mouse movement should be multiplied by. Could also be called
+        /// "sensitivity".
         /// </summary>
         public Vector2 MouseMovementScale { get; set; }
         /// <summary>
-        /// <c>ScreenDimensions</c> property stores and retrieves the current dimensions
-        /// of the application screen. This must be set by the consuming application.
+        /// <c>ScreenDimensions</c> property stores and retrieves the current
+        /// dimensions of the application screen. This must be set by the
+        /// consuming application.
         /// </summary>
         public Vector2 ScreenDimensions { get; set; }
     }

@@ -64,11 +64,21 @@ namespace Engine.Characters
             // Add the newly generated sprite.
             Sprites.Add(sprite);
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public int Count { get { return _count; } set { _count = value; } }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public Native.ConsoleColor ForegroundColor { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Native.ConsoleColor BackgroundColor { get; private set; }
-
+        /// <summary>
+        /// 
+        /// </summary>
         private int _count;
     }
 }

@@ -98,14 +98,13 @@ namespace Engine.Characters.UI
         /// 
         /// </summary>
         public string Text { get; set; }
-#if COLOR_MODE_4_BIT
         /// <summary>
         /// 
         /// </summary>
-        public CHAR_INFO_ATTRIBUTE CharAttributes { get; set; }
-#elif COLOR_MODE_24_BIT
         public Native.ConsoleColor ForegroundColor { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Native.ConsoleColor BackgroundColor { get; set; }
-#endif
     }
 }

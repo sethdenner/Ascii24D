@@ -96,16 +96,16 @@ namespace Engine.Characters.UI
             _keyboardStates = [];
             _mouseStates = [];
 
-            Messenger<Input.Input.JoystickMessage>.Register(HandleJoystickMessage);
-            Messenger<Input.Input.KeyboardMessage>.Register(HandleKeyboardMessage);
-            Messenger<Input.Input.MouseMessage>.Register(HandleMouseMessage);
+            Messenger<JoystickMessage>.Register(HandleJoystickMessage);
+            Messenger<KeyboardMessage>.Register(HandleKeyboardMessage);
+            Messenger<MouseMessage>.Register(HandleMouseMessage);
         }
         /// <summary>
         /// Update method. Populates the window text with details about the current state
         /// of connected input devices.
         /// </summary>
         /// <param name="elapsedSeconds">The total application execution time in seconds.</param>
-        public void Update(float elapsedSeconds)
+        public override void Update(float elapsedSeconds)
         {
             // store all the text for the text window in debugText variable.
             List<string> debugText = new List<string>();
@@ -177,14 +177,14 @@ namespace Engine.Characters.UI
         /// message data.
         /// </summary>
         /// <param name="device">
-        /// A reference to an <c>IInputDevice</c> implementing instance
+        /// A reference to an <c>InputDevice</c> implementing instance
         /// representing the device that triggered the message.
         /// </param>
         /// <param name="update">
         /// A reference to an instance of <c>JoysticUpdate</c> containing data
         /// about the updated state of the joystick.
         /// </param>
-        public void HandleJoystickMessage(IInputDevice device, JoystickUpdate update)
+        public void HandleJoystickMessage(InputDevice device, JoystickUpdate update)
         {
             if (!_joystickStates.ContainsKey(device.DeviceGuid))
                 _joystickStates.Add(
@@ -205,14 +205,14 @@ namespace Engine.Characters.UI
         /// message data.
         /// </summary>
         /// <param name="device">
-        /// A reference to an <c>IInputDevice</c> implementing instance
+        /// A reference to an <c>InputDevice</c> implementing instance
         /// representing the device that triggered the message.
         /// </param>
         /// <param name="update">
         /// A reference to an instance of <c>KeyboardUpdate</c> containing data
         /// about the updated state of the keyboard.
         /// </param>
-        public void HandleKeyboardMessage(IInputDevice device, KeyboardUpdate update)
+        public void HandleKeyboardMessage(InputDevice device, KeyboardUpdate update)
         {
             if (!_keyboardStates.ContainsKey(device.DeviceGuid))
                 _keyboardStates.Add(
@@ -234,14 +234,14 @@ namespace Engine.Characters.UI
         /// message data.
         /// </summary>
         /// <param name="device">
-        /// A reference to an <c>IInputDevice</c> implementing instance
+        /// A reference to an <c>InputDevice</c> implementing instance
         /// representing the device that triggered the message.
         /// </param>
         /// <param name="update">
         /// A reference to an instance of <c>MouseUpdate</c> containing data
         /// about the updated state of the mouse.
         /// </param>
-        public void HandleMouseMessage(IInputDevice device, MouseUpdate update)
+        public void HandleMouseMessage(InputDevice device, MouseUpdate update)
         {
             if (!_mouseStates.ContainsKey(device.DeviceGuid))
                 _mouseStates.Add(

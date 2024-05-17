@@ -113,13 +113,13 @@ namespace EngineTests
             int keyboardMessageRecieved = 0;
             int mouseMessageRecieved = 0;
             // Setup handlers to check if input messages are sent properly.
-            Messenger<Input.JoystickMessage>.Register((device, update) => {
+            Messenger<JoystickMessage>.Register((device, update) => {
                 ++joystickMessageRecieved;
             });
-            Messenger<Input.KeyboardMessage>.Register((device, update) => {
+            Messenger<KeyboardMessage>.Register((device, update) => {
                 ++keyboardMessageRecieved;
             });
-            Messenger<Input.MouseMessage>.Register((device, update) => {
+            Messenger<MouseMessage>.Register((device, update) => {
                 ++mouseMessageRecieved;
             });
             Mock<Engine.Input.IDirectInput> mockDirectInput = CreateDirectInputMock();

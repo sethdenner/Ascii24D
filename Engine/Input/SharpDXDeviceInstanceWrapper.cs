@@ -1,31 +1,39 @@
 ﻿using SharpDX.DirectInput;
-using System.Runtime.CompilerServices;
-
 
 namespace Engine.Input
 {
-    public interface IDeviceInstance
-    {
-        public DeviceType GetDeviceType();
-        public Guid GetInstanceGuid();
-        public DeviceInstance SharpDXDeviceInstance { get; set; }
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class SharpDXDeviceInstanceWrapper : IDeviceInstance
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sharpDXDeviceInstance"></param>
         public SharpDXDeviceInstanceWrapper(DeviceInstance sharpDXDeviceInstance)
         {
             SharpDXDeviceInstance = sharpDXDeviceInstance;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public virtual DeviceType GetDeviceType()
         {
             return SharpDXDeviceInstance.Type;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public virtual Guid GetInstanceGuid()
         {
             return SharpDXDeviceInstance.InstanceGuid;
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public DeviceInstance SharpDXDeviceInstance { get; set; }
     }
 }

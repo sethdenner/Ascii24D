@@ -12,11 +12,21 @@ namespace Engine.Render
     /// </summary>
     public class Pixel
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Pixel()
         {
             PixelDescription = new ConsolePixel() { };
             PixelDepth = 0;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="foregroundColor"></param>
+        /// <param name="backgroundColor"></param>
+        /// <param name="character"></param>
+        /// <param name="depth"></param>
         public Pixel(
             Native.ConsoleColor foregroundColor,
             Native.ConsoleColor backgroundColor,
@@ -32,7 +42,13 @@ namespace Engine.Render
             };
             PixelDepth = depth;
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public ConsolePixel PixelDescription { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public int PixelDepth { get; set; }
     }
 }

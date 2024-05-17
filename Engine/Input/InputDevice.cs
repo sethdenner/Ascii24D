@@ -2,15 +2,23 @@
 
 namespace Engine.Input
 {
-    public interface IInputDevice
+    /// <summary>
+    /// 
+    /// </summary>
+    public abstract class InputDevice
     {
-        public DeviceType GetDeviceType();
-        public Guid DeviceGuid { get; }
-    }
-    public abstract class InputDevice : IInputDevice
-    {
+        /// <summary>
+        /// 
+        /// </summary>
         public InputDevice() { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public abstract DeviceType GetDeviceType();
+        /// <summary>
+        /// 
+        /// </summary>
         public abstract Guid DeviceGuid { get; }
     }
 }

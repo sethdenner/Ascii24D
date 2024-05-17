@@ -83,15 +83,30 @@ namespace Engine.Characters
         /// </summary>
         protected List<Sprite> _sprites;
         /// <summary>
+        /// <c>Update</c> method handles simulating the character to the state
+        /// at specified time <c>elapsedSeconds</c>. Calls out to other methods
+        /// that handle simulating the character properties using various game
+        /// systems (i.e. physics, procedural behavior, etc.)
+        /// </summary>
+        /// <param name="elapsedSeconds"></param>
+        public virtual void Update(float elapsedSeconds)
+        {
+            ApplyPhysics(elapsedSeconds);
+        }
+        /// <summary>
+        /// <c>ApplyPhysics</c> method should be overridden implementing
+        /// whatever physics API the game is using. Calling out to the api
+        /// keeps the character realitivly decoupled from the physics api.
+        /// </summary>
+        /// <param name="elapsedSeconds"></param>
+        public virtual void ApplyPhysics(float elapsedSeconds) { }
+        /// <summary>
         /// <c>Sprties</c> is a property that publicly exposes the <c>_sprites</c> <c>List</c>.
         /// </summary>
-        public  List<Sprite> Sprites { get { return _sprites; } }
+        public List<Sprite> Sprites { get { return _sprites; } }
         /// <summary>
         /// 
         /// </summary>
         public Vector3 Position { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
     }
 }

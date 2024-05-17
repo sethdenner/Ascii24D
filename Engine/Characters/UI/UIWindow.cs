@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using Engine.Render;
-using Engine.Native;
 
 namespace Engine.Characters.UI
 {
@@ -22,6 +21,21 @@ namespace Engine.Characters.UI
     /// </summary>
     public class UIWindow : UI
     {
+        public UIWindow() : base()
+        {
+            Width = 0;
+            Height = 0;
+            Position = new Vector3();
+            BackgroundPixel = new Pixel();
+            BorderPixel = new Pixel(); ;
+            BorderWidth = 0;
+            ShowBorder = false;
+            PaddingTop = 0;
+            PaddingBottom = 0;
+            PaddingLeft = 0;
+            PaddingRight = 0;
+            Layout = ChildLayout.Horizontal;
+        }
         /// <summary>
         /// <c>UIWindow</c> constructor. Intializes the window width and
         /// height as well as the character attributes for the background
@@ -66,14 +80,18 @@ namespace Engine.Characters.UI
                 (byte)'#',
                 depth
             );
-            InitializeUIWindow(
-                width,
-                height,
-                position,
-                backgroundPixel,
-                borderPixel,
-                1
-            );
+            Width = width;
+            Height = height;
+            Position = position;
+            BackgroundPixel = backgroundPixel;
+            BorderPixel = borderPixel; ;
+            BorderWidth = 1;
+            ShowBorder = true;
+            PaddingTop = 0;
+            PaddingBottom = 0;
+            PaddingLeft = 0;
+            PaddingRight = 0;
+            Layout = ChildLayout.Horizontal;
         }
         /// <summary>
         /// <c>UIWindow</c> constructor. Intializes the window width and
@@ -133,20 +151,19 @@ namespace Engine.Characters.UI
             bool showBorder
         )
         {
-            InitializeUIWindow(
-                width,
-                height,
-                position,
-                backgroundPixel,
-                borderPixel,
-                borderWidth,
-                paddingBottom,
-                paddingLeft,
-                paddingRight,
-                paddingTop,
-                showBorder
-             );
-        }
+            Width = width;
+            Height = height;
+            Position = position;
+            BackgroundPixel = backgroundPixel;
+            BorderPixel = borderPixel;
+            BorderWidth = borderWidth;
+            PaddingBottom = paddingBottom;
+            PaddingTop = paddingTop;
+            PaddingLeft = paddingLeft;
+            PaddingRight = paddingRight;
+            ShowBorder = showBorder;
+            Layout = ChildLayout.Horizontal;
+       }
         /// <summary>
         /// <c>InitializeUIWindow</c> is a method that initializes all the
         /// necessary properties associated with a <c>UIWindow</c>. 24bit color
@@ -221,6 +238,20 @@ namespace Engine.Characters.UI
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public bool IsPixelAtIndexBorder(int i) {
+            // Test if the pixel at index i is at the edge of the sprite.
+            return (
+                i % Width < BorderWidth || // Left
+                i % Width > Width - BorderWidth - 1 || // Right
+                i < Width * BorderWidth || // Top
+                i > Width * Height - Width * BorderWidth - 1 // Bottom
+            );
+        }
+        /// <summary>
+        /// 
+        /// </summary>
         public override void GenerateSprites()
         {
             Sprite windowSprite = new Sprite(
@@ -231,18 +262,10 @@ namespace Engine.Characters.UI
             );
             for (int i = 0; i < windowSprite.BufferPixels.Length; ++i)
             {
-                if (
-                    i % windowSprite.Width < BorderWidth || // Left edge.
-                    i % windowSprite.Width > windowSprite.Width - BorderWidth - 1 || // Right edge
-                    i < windowSprite.Width * BorderWidth || // Top edge
-                    i > windowSprite.Width * windowSprite.Height - (windowSprite.Width * BorderWidth) - 1 // Bottom edge
-                )
-                {
+                if (IsPixelAtIndexBorder(i)) {
                     // This is a border pixel.
                     windowSprite.BufferPixels[i] = BorderPixel;
-                }
-                else
-                {
+                } else {
                     windowSprite.BufferPixels[i] = BackgroundPixel;
                 }
             }
@@ -257,8 +280,11 @@ namespace Engine.Characters.UI
         {
             if (0 == window.Width && 0 == window.Height)
             {
-                window.Width = Width - (2 * BorderWidth) - PaddingLeft - PaddingRight;
-                window.Height = Height - (2 * BorderWidth) - PaddingTop - PaddingBottom;
+                window.Width = 
+                    Width - (2 * BorderWidth) -
+                    PaddingLeft - PaddingRight;
+                window.Height = Height - (2 * BorderWidth) -
+                    PaddingTop - PaddingBottom;
             }
 
             window.Position = new Vector3(
@@ -305,7 +331,13 @@ namespace Engine.Characters.UI
         /// 
         /// </summary>
         public bool ShowBorder { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Pixel BackgroundPixel { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public Pixel BorderPixel { get; set; }
     }
 }

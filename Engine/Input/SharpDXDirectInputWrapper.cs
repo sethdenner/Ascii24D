@@ -3,23 +3,8 @@
 namespace Engine.Input
 {
     /// <summary>
-    /// <c>IDirectInput</c> declares the interface required
-    /// to interact with <c>SharpDX.DirectInput</c>. Useful
-    /// for allowing unit tests to mock out the third party
-    /// code.
-    /// </summary>
-    public interface IDirectInput
-    {
-        public IList<IDeviceInstance> GetDevices();
-        public InputDevice? CreateInputDevice(IDeviceInstance deviceInstance);
-        public DirectInput? SharpDXDirectInput { get; set; }
-    }
-    /// <summary>
     /// <c>SharpDXDirectInput<c> wrapper class. Gets IDirectInput
     /// implementation from <c>SharpDX.DirectInput.DirectInput</c>.
-    /// this wrapper has the primary function of allowing mocks to
-    /// be created for this third party library making unit tests
-    /// easier.
     /// </summary>
     public class SharpDXDirectInputWrapper : IDirectInput
     {
@@ -56,6 +41,11 @@ namespace Engine.Input
             );
             return deviceInstances;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="deviceInstance"></param>
+        /// <returns></returns>
         public virtual InputDevice? CreateInputDevice(IDeviceInstance deviceInstance)
         {
             // Determine the type of the device and set inputDevice
@@ -81,6 +71,9 @@ namespace Engine.Input
             }
             return inputDevice;
         }
+        /// <summary>
+        /// 
+        /// </summary>
         public DirectInput? SharpDXDirectInput { get; set; }
     }
 }

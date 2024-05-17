@@ -5,14 +5,6 @@ namespace Engine.Characters
 {
     public class CharacterFrameCounter : Character
     {
-#if COLOR_MODE_4_BIT
-        public CharacterFrameCounter(CHAR_INFO_ATTRIBUTE characterAttributes = CHAR_INFO_ATTRIBUTE.BG_WHITE | CHAR_INFO_ATTRIBUTE.FG_BLACK) : base()
-        {
-            _fps = 0;
-            _frameTimes = new List<float>();
-            _characterAttributes = characterAttributes;
-        }
-#elif COLOR_MODE_24_BIT
         /// <summary>
         /// 
         /// </summary>
@@ -39,9 +31,11 @@ namespace Engine.Characters
             _foregroundColor = foregroundColor;
             _backgroundColor = backgroundColor;
         }
-#endif
-
-        public void Update(float elapsedSeconds)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="elapsedSeconds"></param>
+        public override void Update(float elapsedSeconds)
         {
             _frameTimes.Add(elapsedSeconds);
 
@@ -59,7 +53,9 @@ namespace Engine.Characters
             }
 
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         public override void GenerateSprites()
         {
             string fpsString = _fps.ToString() + "FPS";
@@ -85,10 +81,25 @@ namespace Engine.Characters
             Sprites.Clear();
             Sprites.Add(sprite);
         }
+        /// <summary>
+        /// 
+        /// </summary>
         private double _fps;
+        /// <summary>
+        /// 
+        /// </summary>
         private Native.ConsoleColor _foregroundColor;
+        /// <summary>
+        /// 
+        /// </summary>
         private Native.ConsoleColor _backgroundColor;
+        /// <summary>
+        /// 
+        /// </summary>
         private List<float> _frameTimes;
+        /// <summary>
+        /// 
+        /// </summary>
         private const float _updateEverySeconds = 1.0f;
     }
 }
