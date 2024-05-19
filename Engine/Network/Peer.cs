@@ -16,10 +16,16 @@ namespace Engine.Network {
             get; set;
         }
         /// <summary>
-        /// Stores the next integer representing the sequence of reliable
-        /// packets.
+        /// Stores the next integer to use for outbound reliable packets.
         /// </summary>
-        public int NextPacketSequence {
+        public int NextOutboundPacketSequence {
+            get; set;
+        }
+        /// <summary>
+        /// Stores the next integer in the sequence of inbound reliable packets
+        /// to process.
+        /// </summary>
+        public int NextInboundPacketSequence {
             get; set;
         }
         /// <summary>
@@ -63,13 +69,24 @@ namespace Engine.Network {
             }
         }
         /// <summary>
+        /// A dictionary where the key is the sequence value and the value is
+        /// the serialized packet data that was received. Reliable packets are
+        /// stored here until it's their turn to be processed to ensure that
+        /// reliable packets are handled in order.
+        /// </summary>
+        public Dictionary<int, Memory<byte>> ReliablePacketInbox {
+            get; set; 
+        }
+        /// <summary>
         /// <c>Peer</c> default constructor.
         /// </summary>
         public Peer() {
             EndPoint = new(IPAddress.Any, 0);
             // Start at 1 as 0 is reserved for unsequenced.
-            NextPacketSequence = 1;
+            NextOutboundPacketSequence = 1;
+            NextInboundPacketSequence = 1;
             UnacknowledgedPackets = [];
+            ReliablePacketInbox = [];
         }
         /// <summary>
         /// <c>Peer</c> constructor overload that takes an <c>IPEndPint</c> for
@@ -84,8 +101,10 @@ namespace Engine.Network {
         ) {
             EndPoint = endPoint;
             // Start at 1 as 0 is reserved for unsequenced.
-            NextPacketSequence = 1;
+            NextOutboundPacketSequence = 1;
+            NextInboundPacketSequence = 1;
             UnacknowledgedPackets = [];
+            ReliablePacketInbox = [];
         }
         /// <summary>
         /// Finds an unacknowledged packet matching the <c>PacketIDToAck</c>
@@ -120,7 +139,7 @@ namespace Engine.Network {
         /// An integer representing the next sequence value to use.
         /// </returns>
         public int GetNextPacketSequence() {
-            return NextPacketSequence++;
+            return NextOutboundPacketSequence++;
         }
         /// <summary>
         /// Add sent reliable packet to the UnacknowledgedPackets dictionary for

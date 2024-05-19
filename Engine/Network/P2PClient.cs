@@ -2,6 +2,8 @@
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Buffers;
+using System.Collections;
+using SharpDX.Win32;
 namespace Engine.Network {
     /// <summary>
     /// <c>DReceivedPacket</c> delegate declares a method intended to
@@ -15,7 +17,7 @@ namespace Engine.Network {
     /// A memory buffer containing the data sent from the remote instance.
     /// </param>
     /// <returns></returns>
-    public delegate Task<Packet?> DReceivedPacket(
+    public delegate Packet? DReceivedPacket(
         EndPoint endPoint,
         Memory<byte> packetData
     );
@@ -57,8 +59,8 @@ namespace Engine.Network {
         /// </param>
         public P2PClient(ISocket? socket = null) {
             _socket = socket;
-            _gameCallback = async (endPoint, dataBuffer) => {
-                return await Task<Packet?>.Run(Packet? () => { return null; });
+            _gameCallback = (endPoint, dataBuffer) => {
+                return null;
             };
             _peers = [];
             ReceivingData = false;
@@ -120,48 +122,6 @@ namespace Engine.Network {
             return await task0 + await task1 + await task3;
         }
         /// <summary>
-        /// <c>GetSubnetMask</c> uses the <c>NetworkInterface</c> api to
-        /// determine the subnet mask for the open P2P socket.
-        /// </summary>
-        /// <returns>
-        /// An instance of <c>IPAddress</c> representing the subnet
-        /// mask of the network the socket is currently on.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// <c>InvalidOperationException</c> is thrown when the socket
-        /// referenced by <c>_socket</c> is in an invalid state or if the
-        /// interface corresponding to the socket cannot be found.
-        /// </exception>
-        private IPAddress GetSubnetMask() {
-            if (null == _socket)
-                throw new InvalidOperationException(
-                   nameof(_socket) + " is null."
-               );
-            if (null == _socket.LocalEndPoint)
-                throw new InvalidOperationException(
-                    nameof(_socket.LocalEndPoint) + " is null."
-                );
-            // Iterate through all known network interfaces and find the one
-            // that matches the socket that the client is currently using.
-            foreach (var iface in NetworkInterface.GetAllNetworkInterfaces()) {
-                foreach (
-                    var addressInfo in
-                    iface.GetIPProperties().UnicastAddresses
-                ) {
-                    if (
-                        AddressFamily.InterNetwork ==
-                        addressInfo.Address.AddressFamily &&
-                        addressInfo.Address.Equals(_socket.LocalEndPoint.Address)
-                    ) {
-                        return addressInfo.IPv4Mask;
-                    }
-                }
-            }
-            // If the subnet mask can not be obtained local peers can't be
-            // found. Throw an exception in that case.
-            throw new InvalidOperationException("No valid interface found.");
-        }
-        /// <summary>
         /// <c>GetBroadcastAddress</c> calculates the subnet broadcast address
         /// for the currently configured socket.
         /// </summary>
@@ -180,7 +140,7 @@ namespace Engine.Network {
                 );
             // Subnet mask is required for calculating the subnet broadcast
             // address.
-            IPAddress subnetMask = GetSubnetMask();
+            IPAddress subnetMask = _socket.GetSubnetMask();
             byte[] ipAddressBytes =
                 _socket.LocalEndPoint.Address.GetAddressBytes();
             byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
@@ -431,51 +391,171 @@ namespace Engine.Network {
         /// The size of the data buffer in bytes 
         /// </param>
         /// <returns>
-        /// The number of bytes processesd.
+        /// An integer representing an error id if any occur.
         /// </returns>
-        public async Task HandleReceivedData(
+        public int HandleReceivedData(
            IPEndPoint endPoint,
            Memory<byte> dataBuffer,
            int bytesReceived
         ) {
-            await Task.Run(async () => {
-                Peer? peer = GetPeer(endPoint);
-                int processedBytes = 0;
-                Memory<byte> remainingBytes =
-                    dataBuffer[..bytesReceived];
-                while (processedBytes < bytesReceived) {
-                    Packet? packet = null;
-                    PacketType packetType = Packet.GetPacketType(remainingBytes);
-                    switch (packetType) {
-                    case PacketType.PEER_INFO:
-                        packet = HandlePeerInfo(
-                            endPoint,
-                            remainingBytes[..PacketPeerInfo.PacketSize]
-                        );
-                        break;
-                    case PacketType.ACKNOWLEDGE:
-                        packet = await HandleAcknowledge(
-                            endPoint,
-                            remainingBytes
-                        );
-                        break;
-                    default:
-                        packet = await _gameCallback(
-                            endPoint,
-                            remainingBytes
-                        );
-                        break;
-                    }
-                    if (null == packet) {
-                        break; // Data is corrupted. Throw the rest away.
-                    }
-                    processedBytes += packet.GetSize();
-                    remainingBytes = dataBuffer[processedBytes..];
-                    if (null != peer && 0 < packet.Sequence) {
-                        await SendAcknowledge(peer, packet.Sequence);
-                    }
+            int errorCode = 0;
+            Peer? peer = GetPeer(endPoint);
+            int processedBytes = 0;
+            Memory<byte> remainingBytes =
+                dataBuffer[..bytesReceived];
+            while (processedBytes < bytesReceived) {
+                int packetSize = ProcessNextPacketInBuffer(
+                    endPoint,
+                    remainingBytes
+                );
+                if (0 == packetSize) {
+                    // Data is corrupted or unexpected. Throw the rest away.
+                    errorCode = 1;
+                    break;
                 }
-            });
+                processedBytes += packetSize;
+                remainingBytes = dataBuffer[processedBytes..];
+            }
+            return errorCode;
+        }
+        /// <summary>
+        /// Processes a single packet from the front of the provided data
+        /// buffer.
+        /// </summary>
+        /// <param name="endPoint">
+        /// The end point of the remote client we received the data from.
+        /// </param>
+        /// <param name="packetBuffer">
+        /// Data buffer containing serialized packet data we have received.
+        /// </param>
+        /// <returns>
+        /// The number of bytes processed.
+        /// </returns>
+        public int ProcessNextPacketInBuffer(
+            IPEndPoint endPoint,
+            Memory<byte> packetBuffer
+        ) {
+            int processedBytes = 0;
+            PacketType packetType = Packet.GetPacketType(packetBuffer);
+            Packet? packet = null;
+            switch (packetType) {
+            case PacketType.PEER_INFO:
+                packet = HandlePeerInfo(
+                    endPoint,
+                    packetBuffer
+                );
+                break;
+            case PacketType.ACKNOWLEDGE:
+                packet = HandleAcknowledge(
+                    endPoint,
+                    packetBuffer
+                );
+                break;
+            default:
+                Peer? peer = GetPeer(endPoint);
+                if (null == peer) {
+                    // Data from unknown peer that isn't a connection request.
+                    // We don't allow these to go out to the rest of the app.
+                    break;
+                }
+                // Guarantee reliable packet order.
+                int sequence = Packet.GetPacketSequence(packetBuffer);
+                if (
+                    sequence > 0 &&
+                    sequence != peer.NextInboundPacketSequence
+                ) {
+                    // Save the packet data into the reliable packet inbox. Just
+                    // save all the rest of the buffer because we don't know
+                    // the size and the whole frame is going to be out of order.
+                    // Only save the key if we don't have it already. This can
+                    // happen if we have recieved the packet but have it has not
+                    // been acknowledged yet causing the remote client to
+                    // resend.
+                    if (!peer.ReliablePacketInbox.ContainsKey(sequence)) {
+                        peer.ReliablePacketInbox.Add(
+                            sequence,
+                            packetBuffer
+                        );
+                    }
+                    // Everything processed for now. Return the full length of
+                    // the buffer.
+                    processedBytes += packetBuffer.Length;
+                    break;
+                } else {
+                    // Increament NextInboundPacketSequence and also pass packet
+                    // data to the applicaiton callback.
+                    packet = _gameCallback(
+                        endPoint,
+                        packetBuffer
+                    );
+                    if (null == packet) {
+                        // Something bad happened. bail.
+                        break;
+                    }
+                    ++peer.NextInboundPacketSequence;
+                    _ = SendAcknowledge(peer, packet.Sequence);
+                    processedBytes += packet.GetSize();
+                    // Lets keep processing pending packet data if we
+                    // if we have it.
+                    ProcessPendingPackets(peer);
+                }
+                break;
+            }
+            return processedBytes;
+        }
+        /// <summary>
+        /// Processes any pending packets in <c>ReliablePacketInbox</c> in order
+        /// if all subsequent packets have been received.
+        /// </summary>
+        /// <param name="peer">
+        /// The peer whose pending packets are to be processed.
+        /// </param>
+        /// <returns>
+        /// Returns an integer representing an error has occured or 0 if all OK.
+        /// </returns>
+        public int ProcessPendingPackets(Peer peer) {
+            int errorCode = 0; // OK
+
+            Packet? pendingPacket = null;
+            int processedPendingBytes = 0;
+            Memory<byte> pendingPacketData;
+            bool haveNextPacket = peer.ReliablePacketInbox.TryGetValue(
+                peer.NextInboundPacketSequence,
+                out pendingPacketData
+            );
+
+            Memory<byte> remainingPendingPacketData;
+            while (haveNextPacket) {
+                peer.ReliablePacketInbox.Remove(peer.NextInboundPacketSequence);
+                peer.NextInboundPacketSequence++;
+                while (processedPendingBytes < pendingPacketData.Length) {
+                    remainingPendingPacketData = pendingPacketData[
+                        processedPendingBytes..
+                    ];
+
+                    pendingPacket = _gameCallback(
+                        peer.EndPoint,
+                        remainingPendingPacketData
+                    );
+
+                    if (null == pendingPacket) {
+                        // Bad packet data. bail!
+                        errorCode = 1;
+                        break;
+                    }
+
+                    _ = SendAcknowledge(peer, pendingPacket.Sequence);
+
+                    processedPendingBytes += pendingPacket.GetSize();
+                }
+
+                haveNextPacket = peer.ReliablePacketInbox.TryGetValue(
+                    peer.NextInboundPacketSequence,
+                    out pendingPacketData
+                );
+            }
+
+            return errorCode;
         }
         /// <summary>
         /// Handles side effects for a recieved acknowledge packet.
@@ -491,22 +571,32 @@ namespace Engine.Network {
         /// A instance of <c>PacketAcknowledge</c> deserialized from the packet
         /// data.
         /// </returns>
-        private async Task<Packet?> HandleAcknowledge(
+        private Packet? HandleAcknowledge(
             IPEndPoint endPoint,
             Memory<byte> dataBuffer
         ) {
-            return await Task<int>.Run(() => {
-                PacketAcknowledge ack = new();
-                Peer? peer = GetPeer(endPoint);
-                if (null == peer)
-                    return ack;
-                ack.FromBinary(dataBuffer);
-                peer.ConfirmAcknowledge(ack);
+            PacketAcknowledge ack = new();
+            Peer? peer = GetPeer(endPoint);
+            if (null == peer)
                 return ack;
-            });
+            ack.FromBinary(dataBuffer);
+            peer.ConfirmAcknowledge(ack);
+            return ack;
         }
         /// <summary>
         /// Starts the process of receiving data over the network.
+        /// </summary>
+        /// <returns>
+        /// The total number of bytes received.
+        /// </returns>
+        public async Task<int> StartReceivingData() {
+            int errorCode = 0;
+            ReceivingData = true;
+            errorCode = await ReceiveData();
+            return errorCode;
+        }
+        /// <summary>
+        /// Method that handles the loop for receiving data.
         /// </summary>
         /// <returns>
         /// The total number of bytes received.
@@ -515,32 +605,40 @@ namespace Engine.Network {
         /// Exception is thrown if the <c>_socket</c> property is not a valid
         /// and initialized socket.
         /// </exception>
-        public async Task<int> StartReceivingData() {
+        public async Task<int> ReceiveData() {
             if (null == _socket)
                 throw new InvalidOperationException(
                     nameof(_socket) + "is null."
                 );
-            ReceiveFromCancellationSource.Dispose();
-            ReceiveFromCancellationSource = new CancellationTokenSource();
-            int errorCode = 0;
-            ReceivingData = true;
+
+            int errorCode = 0; // OK
+            // Pin the receive data buffer so the garbage collector doesn't
+            // clean it up.
             byte[] buffer = GC.AllocateArray<byte>(ETHERNET_FRAME_SIZE, true);
             Memory<byte> memoryBuffer = buffer.AsMemory();
+            SocketReceiveFromResult result;
             while (ReceivingData) {
-                SocketReceiveFromResult result = await _socket.ReceiveFromAsync(
-                    memoryBuffer,
-                    new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort),
-                    ReceiveFromCancellationSource.Token
-                );
+                try {
+                    result = await _socket.ReceiveFromAsync(
+                        memoryBuffer,
+                        new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort),
+                        ReceiveFromCancellationSource.Token
+                    );
+                } catch (OperationCanceledException) {
+                    // Receiving data has been stopped by consuming application.
+                    break;
+                }
                 IPEndPoint? remoteEP = result.RemoteEndPoint as IPEndPoint;
                 if (null == remoteEP)
                     continue;
-                await HandleReceivedData(
+                errorCode = HandleReceivedData(
                     remoteEP as IPEndPoint,
                     memoryBuffer,
                     result.ReceivedBytes
                 );
             }
+            ReceiveFromCancellationSource.Dispose();
+            ReceiveFromCancellationSource = new CancellationTokenSource();
             return errorCode;
         }
         /// <summary>
