@@ -1,10 +1,8 @@
-﻿using Xunit;
 using Engine.Network;
-using System.Net;
 using System.Diagnostics;
-using System.Net.WebSockets;
-namespace EngineTests
-{
+using Xunit;
+
+namespace EngineIntegrationTests {
     /// <summary>
     /// Packet class to use for testing.
     /// </summary>
@@ -30,86 +28,20 @@ namespace EngineTests
     /// <summary>
     /// 
     /// </summary>
-    public class NetworkTests
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        [Fact]
-        public void TestPacketPeerInfoSerialization() {
-            PacketPeerInfo peerInfo = new PacketPeerInfo();
-            peerInfo.IPAddress = [127, 0, 0, 1];
-            peerInfo.Port = 21;
-            peerInfo.Sequence = 1;
-
-            Memory<byte> buffer = peerInfo.ToBinary();
-
-            PacketPeerInfo peerInfoFromBuffer = new PacketPeerInfo();
-            peerInfoFromBuffer.FromBinary(buffer);
-
-            Assert.Equal(
-                peerInfo.IPAddress,
-                peerInfoFromBuffer.IPAddress
-            );
-            Assert.Equal(peerInfo.Port, peerInfoFromBuffer.Port);
-            Assert.Equal(peerInfo.Sequence, peerInfoFromBuffer.Sequence);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        [Fact]
-        public void TestPacketAcknowledgeSerialization() {
-            PacketAcknowledge ack = new();
-            ack.PacketIDToAck = 2;
-            ack.Sequence = 3;
-
-            Memory<byte> buffer = ack.ToBinary();
-
-            PacketAcknowledge ackFromBinary = new PacketAcknowledge();
-            ackFromBinary.FromBinary(buffer);
-
-            Assert.Equal(ack.PacketIDToAck, ackFromBinary.PacketIDToAck);
-            Assert.Equal(ack.Sequence, ackFromBinary.Sequence);
-        }
-        [Fact]
-        public void TestP2PClentPeerManagementMethods() {
-            P2PClient client = new P2PClient();
-
-            IPEndPoint lanEndPoint = new IPEndPoint(new IPAddress(new byte[] {
-                192, 162, 0, 69
-            }), 23231);
-            IPEndPoint wanEndpoint = new IPEndPoint(new IPAddress(new byte[] {
-                1, 2, 3, 4
-            }), 42069);
-            Peer peerA = client.GetOrAddPeer(lanEndPoint);
-            Peer? peerB = client.GetPeer(lanEndPoint);
-
-            IPEndPoint lanEndPoint1 = new IPEndPoint(new IPAddress(new byte[] {
-                0, 0, 0, 0
-            }), 0);
-            IPEndPoint wanEndpoint1 = new IPEndPoint(new IPAddress(new byte[] {
-                0, 0, 0, 0
-            }), 0);
-            Peer? peerC = client.GetPeer(lanEndPoint1);
-
-            Assert.Null(peerC);
-        }
+    public class NetworkTests {
         /// <summary>
         /// Test sending and receiving packets over the local area network.
         /// </summary>
         [Fact]
-        public async void TestP2PClientTestSendAndReceivePacket()
-        {
+        public async void TestP2PClientTestSendAndReceivePacket() {
             var socket0 = new SocketUdp();
             var socket1 = new SocketUdp();
             var serverSocket = new SocketUdp();
             bool client0PacketReceived = false;
             bool client1PacketReceived = false;
             var client0 = new P2PClient(socket0,
-                async (endPoint, packetData) =>
-                {
-                    return await Task<Packet?>.Run(Packet? () =>
-                    {
+                async (endPoint, packetData) => {
+                    return await Task<Packet?>.Run(Packet? () => {
                         PacketType packetType = Packet.GetPacketType(
                             packetData
                         );
@@ -132,12 +64,12 @@ namespace EngineTests
                         PacketType packetType = Packet.GetPacketType(
                             packetData
                         );
-                        if(TestPacket.PACKET_TYPE == packetType) {
+                        if (TestPacket.PACKET_TYPE == packetType) {
                             client1PacketReceived = true;
                             TestPacket packet = new TestPacket();
                             packet.FromBinary(packetData);
                             return packet;
-                        } else { 
+                        } else {
                             return null;
                         }
                     });
@@ -147,19 +79,21 @@ namespace EngineTests
             var server = new P2PClient(serverSocket, async (
                     endpoint,
                     packetData
-                ) => { return await Task<Packet?>.Run(Packet? () => {
-                    PacketType packetType = Packet.GetPacketType(
-                        packetData
-                    );
-                    if ( TestPacket.PACKET_TYPE == packetType ) {
-                        client1PacketReceived = true;
-                        TestPacket packet = new TestPacket();
-                        packet.FromBinary(packetData);
-                        return packet;
-                    } else {
-                        return null;
-                    }
-                }); },
+                ) => {
+                    return await Task<Packet?>.Run(Packet? () => {
+                        PacketType packetType = Packet.GetPacketType(
+                            packetData
+                        );
+                        if (TestPacket.PACKET_TYPE == packetType) {
+                            client1PacketReceived = true;
+                            TestPacket packet = new TestPacket();
+                            packet.FromBinary(packetData);
+                            return packet;
+                        } else {
+                            return null;
+                        }
+                    });
+                },
                 true
             );
 
@@ -195,7 +129,9 @@ namespace EngineTests
             while (
                 (!client0PacketReceived || !client1PacketReceived) &&
                 stopwatch.ElapsedMilliseconds < packetTestTimeout
-            ) { Thread.Sleep(10); }
+            ) {
+                Thread.Sleep(10);
+            }
 
             Assert.True(client0PacketReceived);
             Assert.True(client1PacketReceived);
@@ -225,7 +161,7 @@ namespace EngineTests
                         client1AllPacketsAcknowledged &&
                         0 == peer.UnacknowledgedPackets.Count;
                 }
-                foreach (var peer in server.Peers ) {
+                foreach (var peer in server.Peers) {
                     serverAllPacketsAcknowledged =
                         serverAllPacketsAcknowledged &&
                         0 == peer.UnacknowledgedPackets.Count;
@@ -236,7 +172,7 @@ namespace EngineTests
             client0.Stop();
             client1.Stop();
             server.Stop();
- 
+
             Assert.Equal(2, server.Peers.Count);
             Assert.Equal(2, client0.Peers.Count);
             Assert.Equal(2, client1.Peers.Count);
