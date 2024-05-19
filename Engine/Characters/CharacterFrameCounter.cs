@@ -8,28 +8,38 @@ namespace Engine.Characters
         /// <summary>
         /// 
         /// </summary>
-        public CharacterFrameCounter() : base() 
-        {
-            _fps = 0;
-            _frameTimes = new List<float>();
-            _foregroundColor = new Native.ConsoleColor() { };
-            _backgroundColor = new Native.ConsoleColor() {
-                R = (byte)255, G = (byte)255, B = (byte)255
-            };
+        public byte ForegroundColorIndex {
+            get; set;
         }
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="foregroundColor"></param>
-        /// <param name="backgroundColor"></param>
+        public byte BackgroundColorIndex {
+            get; set;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public CharacterFrameCounter() : base() 
+        {
+            _fps = 0;
+            _frameTimes = new List<float>();
+            ForegroundColorIndex = 0;
+            BackgroundColorIndex = 0;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="foregroundColorIndex"></param>
+        /// <param name="backgroundColorIndex"></param>
         public CharacterFrameCounter(
-            Native.ConsoleColor foregroundColor,
-            Native.ConsoleColor backgroundColor
+            byte foregroundColorIndex,
+            byte backgroundColorIndex
         ) : base() {
             _fps = 0;
             _frameTimes = new List<float>();
-            _foregroundColor = foregroundColor;
-            _backgroundColor = backgroundColor;
+            ForegroundColorIndex = foregroundColorIndex;
+            BackgroundColorIndex = backgroundColorIndex;
         }
         /// <summary>
         /// 
@@ -58,25 +68,19 @@ namespace Engine.Characters
         /// </summary>
         public override void GenerateSprites()
         {
-            string fpsString = _fps.ToString() + "FPS";
-
-            Sprite sprite = new Sprite(
-                fpsString.Length,
+            Sprite sprite = new(
+                FpsString.Length,
                 1,
-                -fpsString.Length,
-                0
+                (int)Math.Floor(Position.X),
+                (int)Math.Floor(Position.Y)
             );
-            sprite.EdgeBehavior = EdgeBehavior.WRAP;
-            for (int i = 0; i < fpsString.Length; ++i)
+            for (int i = 0; i < FpsString.Length; ++i)
             {
-                sprite.BufferPixels[i] = PixelManager.CreatePixel(
-                    new Native.ConsoleColor() { },
-                    new Native.ConsoleColor() {
-                        R = (byte)200, G = (byte)200, B = (byte)200
-                    },
-                    (byte)fpsString[i],
-                    (int)Math.Floor(Position.Z)
-                );
+                sprite.BufferPixels[i] = new ConsolePixel {
+                    ForegroundColorIndex = ForegroundColorIndex,
+                    BackgroundColorIndex = BackgroundColorIndex,
+                    CharacterCode = (byte)FpsString[i]
+                };
             }
             Sprites.Clear();
             Sprites.Add(sprite);
@@ -84,15 +88,15 @@ namespace Engine.Characters
         /// <summary>
         /// 
         /// </summary>
+        public string FpsString {
+            get {
+                return _fps.ToString() + "FPS";
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
         private double _fps;
-        /// <summary>
-        /// 
-        /// </summary>
-        private Native.ConsoleColor _foregroundColor;
-        /// <summary>
-        /// 
-        /// </summary>
-        private Native.ConsoleColor _backgroundColor;
         /// <summary>
         /// 
         /// </summary>

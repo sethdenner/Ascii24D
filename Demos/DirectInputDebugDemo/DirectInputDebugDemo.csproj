@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ConsoleWindows\ConsoleWindows.vcxproj">
+      <IncludeAssets></IncludeAssets>
+      <ReferenceOutputAssembly>True</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\..\Engine\Engine.csproj" />
   </ItemGroup>
 

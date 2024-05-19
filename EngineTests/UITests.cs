@@ -1,4 +1,5 @@
 ﻿using Engine.Characters.UI;
+using Engine.Native;
 using Engine.Render;
 using System.Numerics;
 using Xunit;
@@ -15,18 +16,16 @@ namespace EngineTests
             Vector3 position = new Vector3(
                 1, 2, 3
             );
-            Pixel backgroundPixel = new Pixel(
-                new Engine.Native.ConsoleColor() { },
-                new Engine.Native.ConsoleColor() { },
-                (byte)'1',
-                1
-            );
-            Pixel borderPixel = new Pixel(
-                new Engine.Native.ConsoleColor() { },
-                new Engine.Native.ConsoleColor() { },
-                (byte)'2',
-                2
-            );
+            ConsolePixel backgroundPixel = new() {
+                ForegroundColorIndex = 0,
+                BackgroundColorIndex = 0,
+                CharacterCode = (byte)'1'
+            };
+            ConsolePixel borderPixel = new() {
+                ForegroundColorIndex = 0,
+                BackgroundColorIndex = 0,
+                CharacterCode = (byte)'2'
+            };
             int borderWidth = 1;
             int paddingBottom = 2;
             int paddingLeft = 3;
@@ -37,7 +36,9 @@ namespace EngineTests
             UIWindow window1 = new UIWindow(
                 width,
                 height,
-                position
+                position,
+                backgroundPixel,
+                borderPixel
             );
             UIWindow window2 = new UIWindow(
                 width,

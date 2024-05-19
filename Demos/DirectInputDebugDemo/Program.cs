@@ -6,6 +6,7 @@ using Engine.Characters.UI;
 using Engine.Render;
 using Engine.Native;
 using Engine.Core;
+using System.Numerics;
 
 namespace DirectInputDebugDemo
 {
@@ -51,8 +52,7 @@ namespace DirectInputDebugDemo
                newWindowSize.Top
            );
         }
-        static int Main(string[] args)
-        {
+        static int Main(string[] args) {
             DirectInput sharpDXDirectInput = new DirectInput();
             SharpDXDirectInputWrapper sharpDxDirectInputWrapper = (
                 new SharpDXDirectInputWrapper(sharpDXDirectInput)
@@ -73,6 +73,51 @@ namespace DirectInputDebugDemo
 
             Console.Clear();
 
+            PaletteInfo[] palette = [
+                new PaletteInfo() { // Black
+                    Color = new Engine.Native.ConsoleColor() {
+                        R = 0,
+                        G = 0,
+                        B = 0
+                    },
+                    Index = 0
+                },
+                new PaletteInfo() { // White
+                    Color = new Engine.Native.ConsoleColor() {
+                        R = 255,
+                        G = 255,
+                        B = 255
+                    },
+                    Index = 1
+                },
+                new PaletteInfo() { // Red
+                    Color = new Engine.Native.ConsoleColor() {
+                        R = 255,
+                        G = 0,
+                        B = 0
+                    },
+                    Index = 2
+                },
+                new PaletteInfo() { // Light Gray
+                    Color = new Engine.Native.ConsoleColor() {
+                        R = 76,
+                        G = 76,
+                        B = 76
+                    },
+                    Index = 3
+                },
+                new PaletteInfo() { // Dark Gray
+                    Color = new Engine.Native.ConsoleColor() {
+                        R = 25,
+                        G = 25,
+                        B = 25
+                    },
+                    Index = 4
+                }
+            ];
+
+            Native.SetScreenColors(5, palette);
+
             Sprite framebuffer = CreateFramebuffer(
                 Native.WindowWidth,
                 Native.WindowHeight,
@@ -80,13 +125,21 @@ namespace DirectInputDebugDemo
                 0
             );
 
-            CharacterFrameCounter fpsCounter = new CharacterFrameCounter();
+            CharacterFrameCounter fpsCounter = new CharacterFrameCounter(
+                0,
+                3
+            );
             UIWindowTextDebugInput inputDebugWindow = (
                 new UIWindowTextDebugInput(input)
             );
+            inputDebugWindow.Position = new Vector3(
+                inputDebugWindow.Position.X,
+                inputDebugWindow.Position.Y,
+                0
+            );
             Map demoMap = new Map();
-            demoMap.AddCharacter(inputDebugWindow);
             demoMap.AddCharacter(fpsCounter);
+            demoMap.AddCharacter(inputDebugWindow);
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -101,12 +154,6 @@ namespace DirectInputDebugDemo
                     (float)elapsedTime / (float)Stopwatch.Frequency
                 );
 
-                input.Update();
-                Native.UpdateConsoleTitle(elapsedSeconds);
-
-                inputDebugWindow.Update(elapsedSeconds);
-                fpsCounter.Update(elapsedSeconds);
-                fpsCounter.GenerateSprites();
 
                 SMALL_RECT newWindowSize;
                 if (Native.HandleWindowResize(out newWindowSize))
@@ -116,36 +163,38 @@ namespace DirectInputDebugDemo
 
                 try
                 {
-                    framebuffer.Fill(PixelManager.CreatePixel(
-                        new Engine.Native.ConsoleColor() {
-                            R = (byte)255,
-                            G = (byte)0,
-                            B = (byte)0
-                        },
-                        new Engine.Native.ConsoleColor() {
-                            R = (byte)255,
-                            G = (byte)0,
-                            B = (byte)0
-                        },
-                        (byte)' ',
-                        0
-                    ));
+                    framebuffer.Fill(new ConsolePixel() {
+                        ForegroundColorIndex = 2,
+                        BackgroundColorIndex = 2,
+                        CharacterCode = (byte)' '
+                    });
                 }
                 catch (System.IndexOutOfRangeException)
                 {
                     framebuffer = ResizeWindow(newWindowSize);
                 }
 
+                input.Update();
+                Native.UpdateConsoleTitle(elapsedSeconds);
+
+                fpsCounter.Update(elapsedSeconds);
+                fpsCounter.Position = new Vector3(
+                    framebuffer.Width - fpsCounter.FpsString.Length,
+                    0,
+                    0
+                );
+                inputDebugWindow.Update(elapsedSeconds);
+
                 demoMap.Render(framebuffer);
 
                 try
                 {
-                    Native.CopyBufferToScreenVT(
-                        framebuffer.GetNativePixelBuffer(),
+                    Native.CopyBufferToScreen(
+                        framebuffer.BufferPixels,
                         framebuffer.Width,
                         framebuffer.Height,
-                        framebuffer.OffsetX,
-                        framebuffer.OffsetY
+                        0,
+                        0
                     );
                 }
                 catch (System.IndexOutOfRangeException)

@@ -3,28 +3,18 @@
 namespace Engine.Render
 {
     /// <summary>
-    /// Enumeration used for specifying how to handle border overflow during
-    /// <c>Sprite</c> addition.
-    /// </summary>  
-    public enum EdgeBehavior
-    {
-        CLAMP,
-        WRAP
-    }
-    /// <summary>
     /// A <c>Sprite</c> is a collection of buffer pixels  meant to be rendered
     /// to a console buffer as a square block of text and attributes.
     /// </summary>    
-    public class Sprite
-    {
+    public class Sprite {
         /// <summary>
         /// <c>Sprite</c> default constructor.
         /// </summary>
-        public Sprite()
-        {
-            Width = 0; Height = 0;
-            OffsetX = 0; OffsetY = 0;
-            EdgeBehavior = EdgeBehavior.CLAMP;
+        public Sprite() {
+            Width = 0;
+            Height = 0;
+            OffsetX = 0;
+            OffsetY = 0;
             BufferPixels = [];
         }
         /// <summary>
@@ -54,73 +44,13 @@ namespace Engine.Render
             int width,
             int height,
             int offsetX = 0,
-            int offsetY = 0,
-            EdgeBehavior edgeBehavior = EdgeBehavior.CLAMP
-        )
-        {
+            int offsetY = 0
+        ) {
             Width = width;
             Height = height;
             OffsetX = offsetX;
             OffsetY = offsetY;
-            BufferPixels = new Pixel[width * height];
-            EdgeBehavior = edgeBehavior;
-        }
-        /// <summary>
-        /// <c>DepthTest</c> method checks the <c>PixelDepth</c> of the
-        /// <c>Pixel</c> in the <c>Sprite</c> a position (x, y) against the
-        /// provided depth value.
-        /// </summary>
-        /// <param name="x">
-        /// The position on the <c>Sprite</c> in the x axis.
-        /// </param>
-        /// <param name="y">
-        /// The position on the <c>Sprite</c> in the y axis.
-        /// </param>
-        /// <param name="depth"></param>
-        /// The depth value to test against the current pixel at position
-        /// (x, y).
-        /// <returns>
-        /// Returns <c>true</c> if <paramref name="depth"/> is greater than the
-        /// current <c>PixelDepth</c> at position (x, y). Otherwise <c>false</c>
-        /// is returned.
-        /// </returns>
-        public bool DepthTest(
-            int x,
-            int y,
-            int depth
-        )
-        {
-            return DepthTest(x + (y * Width), depth);
-        }
-        /// <summary>
-        /// <c>DepthTest</c> method checks the <c>PixelDepth</c> of the
-        /// <c>Pixel</c> in the <c>Sprite</c> a position (x, y) against the
-        /// provided depth value.
-        /// </summary>
-        /// <param name="i">
-        /// The index into the pixel buffer to test.
-        /// </param>
-        /// <param name="depth"></param>
-        /// The depth value to test against the current pixel at position
-        /// (x, y).
-        /// <returns>
-        /// Returns <c>true</c> if <paramref name="depth"/> is greater than the
-        /// current <c>PixelDepth</c> at position (x, y). Otherwise <c>false</c>
-        /// is returned.
-        /// </returns>
-        public bool DepthTest(
-            int i,
-            int depth
-        )
-        {
-            if (depth >= BufferPixels[i].PixelDepth)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            BufferPixels = new ConsolePixel[width * height];
         }
         /// <summary>
         /// <c>MergeSprite</c> blends the provided sprite onto the pixel buffer.
@@ -131,72 +61,52 @@ namespace Engine.Render
         /// <returns><c>this</c></returns>
         public Sprite MergeSprite(
             Sprite sprite
-        )
-        {
-            for (int y = 0; y < sprite.Height; ++y)
-            {
-                for (int x = 0; x < sprite.Width; ++x)
-                {
-                    int xCoord = x + sprite.OffsetX;
-                    int yCoord = y + sprite.OffsetY;
-                    if (
-                        EdgeBehavior.CLAMP ==
-                        sprite.EdgeBehavior
-                    )
-                    {
-                        // Handle clamping.
-                        if (xCoord >= Width || xCoord < 0) continue;
-                        if (yCoord >= Height || yCoord < 0) continue;
-                    }
-                    else if (
-                        EdgeBehavior.WRAP ==
-                        sprite.EdgeBehavior
-                    )
-                    {
-                        // Handle wrapping.
-                        if (xCoord >= Width || xCoord < 0) xCoord = (
-                            (Width - Math.Abs(xCoord)) % Width
-                        );
-                        if (yCoord >= Height || yCoord < 0) yCoord = (
-                            (Height - Math.Abs(yCoord)) % Height
-                        );
-                    }
-                    int rhsBufferIndex = x + y * sprite.Width;
-                    int lhsBufferIndex = xCoord + yCoord * Width;
-                    Pixel rhsPixel = sprite.BufferPixels[rhsBufferIndex];
-                    DepthTest(xCoord, yCoord, rhsPixel.PixelDepth);
-                    BufferPixels[lhsBufferIndex] = rhsPixel;
+        ) {
+            for (int y = 0; y < sprite.Height; ++y) {
+                int clampedWidth = sprite.Width;
+                if (clampedWidth > Width) {
+                    clampedWidth = Width;
                 }
+                int rhsStart = y * clampedWidth;
+                int rhsEnd = rhsStart + clampedWidth;
+                int lhsStart = (y + sprite.OffsetY) * Width + sprite.OffsetX;
+                int lhsEnd = lhsStart + clampedWidth;
+                sprite.BufferPixels.AsSpan()[rhsStart..rhsEnd].CopyTo(
+                    BufferPixels.AsSpan()[lhsStart..lhsEnd]
+                );
             }
-            OffsetX = sprite.OffsetX;
-            OffsetY = sprite.OffsetY;
             return this;
         }
         /// <summary>
         /// An array of <c>Pixel</c> instances representing the sprite.
         /// </summary>
-        public Pixel[] BufferPixels { get; }
+        public ConsolePixel[] BufferPixels {
+            get;
+        }
         /// <summary>
         /// The total width of the sprite.
         /// </summary>
-        public int Width { get; set; }
+        public int Width {
+            get; set;
+        }
         /// <summary>
         /// The total height of the sprite.
         /// </summary>
-        public int Height { get; set; }
+        public int Height {
+            get; set;
+        }
         /// <summary>
         /// The offset in the x-axis the sprite should be rendered.
         /// </summary>
-        public int OffsetX { get; set; }
+        public int OffsetX {
+            get; set;
+        }
         /// <summary>
         /// The offset in the y-axis the sprite should be renderd.
         /// </summary>
-        public int OffsetY { get; set; }
-        /// <summary>
-        /// <c>EdgeBehavior</c> specifies how to handle rendering outside of the
-        /// bounds of a render target.
-        /// </summary>
-        public EdgeBehavior EdgeBehavior { get; set; }
+        public int OffsetY {
+            get; set;
+        }
         /// <summary>
         /// <c>SetPixel</c> method sets the pixel in the pixel buffer at
         /// position (x, y) to the provided <c>Pixel</c> instance.
@@ -218,13 +128,9 @@ namespace Engine.Render
         public bool SetPixel(
             int x,
             int y,
-            Pixel bufferPixel
-        )
-        {
+            ConsolePixel bufferPixel
+        ) {
             if (Width <= x || 0 > x || Height <= y || 0 > y)
-                return false;
-
-            if (!DepthTest(x, y, bufferPixel.PixelDepth))
                 return false;
 
             BufferPixels[x + y * Width] = bufferPixel;
@@ -248,14 +154,9 @@ namespace Engine.Render
         /// </returns>
         public bool SetPixel(
             int i,
-            Pixel bufferPixel
-        )
-        {
+            ConsolePixel bufferPixel
+        ) {
             if (i < 0 || i >= BufferPixels.Length)
-                return false;
-
-            // Pass in i as x and 0 as y. Math works out.
-            if (!DepthTest(i, bufferPixel.PixelDepth))
                 return false;
 
             BufferPixels[i] = bufferPixel;
@@ -269,29 +170,8 @@ namespace Engine.Render
         /// <param name="bufferPixel">
         /// The <c>Pixel</c> instance tro copy into the pixel buffer.
         /// </param>
-        public void Fill(Pixel bufferPixel)
-        {
-            for (var i = 0; i < BufferPixels.Length; ++i)
-            {
-                BufferPixels[i] = bufferPixel;
-            }
-        }
-        /// <summary>
-        /// <c>GetNativePixelBuffer</c> converts the pixel buffer from
-        /// <c>Pixel</c> instances to the marshallable <c>ConsolePixel</c>
-        /// struct.
-        /// </summary>
-        /// <returns>
-        /// An array of <c>ConsolePixel</c> values.
-        /// </returns>
-        public ConsolePixel[] GetNativePixelBuffer()
-        {
-            ConsolePixel[] buffer = new ConsolePixel[BufferPixels.Length];
-            for (int i = 0; i < BufferPixels.Length; ++i)
-            {
-                buffer[i] = BufferPixels[i].PixelDescription;
-            }
-            return buffer;
+        public void Fill(ConsolePixel bufferPixel) {
+            BufferPixels.AsSpan().Fill(bufferPixel);
         }
     }
 }

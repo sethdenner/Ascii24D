@@ -7,38 +7,38 @@ namespace Engine.Native
     /// </summary>
     public enum CHAR_INFO_ATTRIBUTE : ushort
     {
-        FG_BLACK = 0x0000,
-        FG_DARK_BLUE = 0x0001,
-        FG_DARK_GREEN = 0x0002,
-        FG_DARK_CYAN = 0x0003,
-        FG_DARK_RED = 0x0004,
-        FG_DARK_MAGENTA = 0x0005,
-        FG_DARK_YELLOW = 0x0006,
-        FG_GREY = 0x0007,
-        FG_DARK_GREY = 0x0008,
-        FG_BLUE = 0x0009,
-        FG_GREEN = 0x000A,
-        FG_CYAN = 0x000B,
-        FG_RED = 0x000C,
-        FG_MAGENTA = 0x000D,
-        FG_YELLOW = 0x000E,
-        FG_WHITE = 0x000F,
-        BG_BLACK = 0x0000,
-        BG_DARK_BLUE = 0x0010,
-        BG_DARK_GREEN = 0x0020,
-        BG_DARK_CYAN = 0x0030,
-        BG_DARK_RED = 0x0040,
-        BG_DARK_MAGENTA = 0x0050,
-        BG_DARK_YELLOW = 0x0060,
-        BG_GREY = 0x0070,
-        BG_DARK_GREY = 0x0080,
-        BG_BLUE = 0x0090,
-        BG_GREEN = 0x00A0,
-        BG_CYAN = 0x00B0,
-        BG_RED = 0x00C0,
-        BG_MAGENTA = 0x00D0,
-        BG_YELLOW = 0x00E0,
-        BG_WHITE = 0x00F0,
+        FG_00 = 0x0000,
+        FG_01 = 0x0001,
+        FG_02 = 0x0002,
+        FG_03 = 0x0003,
+        FG_04 = 0x0004,
+        FG_05 = 0x0005,
+        FG_06 = 0x0006,
+        FG_07 = 0x0007,
+        FG_08 = 0x0008,
+        FG_09 = 0x0009,
+        FG_10 = 0x000A,
+        FG_11 = 0x000B,
+        FG_12 = 0x000C,
+        FG_13 = 0x000D,
+        FG_14 = 0x000E,
+        FG_15 = 0x000F,
+        BG_00 = 0x0000,
+        BG_01 = 0x0010,
+        BG_02 = 0x0020,
+        BG_03 = 0x0030,
+        BG_04 = 0x0040,
+        BG_05 = 0x0050,
+        BG_06 = 0x0060,
+        BG_07 = 0x0070,
+        BG_08 = 0x0080,
+        BG_09 = 0x0090,
+        BG_10 = 0x00A0,
+        BG_11 = 0x00B0,
+        BG_12 = 0x00C0,
+        BG_13 = 0x00D0,
+        BG_14 = 0x00E0,
+        BG_15 = 0x00F0,
         COMMON_LVB_GRID_HORIZONTAL = 0x0400,
         COMMON_LVB_GRID_LVERTICAL = 0x0800,
         COMMON_LVB_GRID_RVERTICAL = 0x1000,
@@ -92,9 +92,17 @@ namespace Engine.Native
     [StructLayout(LayoutKind.Sequential)]
     public struct ConsolePixel
     {
-        public ConsoleColor ForegroundColor;
-        public ConsoleColor BackgroundColor;
+        public byte ForegroundColorIndex;
+        public byte BackgroundColorIndex;
         public byte CharacterCode;
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PaletteInfo {
+        public byte Index;
+        public ConsoleColor Color;
     }
     /// <summary>
     /// 
@@ -154,7 +162,7 @@ namespace Engine.Native
         )]
         public static extern void CopyBufferToScreen(
             nint consoleWindow,
-            CHAR_INFO[] buffer,
+            ConsolePixel[] buffer,
             int width,
             int height,
             int left,
@@ -163,23 +171,14 @@ namespace Engine.Native
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="consoleWindow"></param>
-        /// <param name="buffer"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="left"></param>
-        /// <param name="top"></param>
         [DllImport(
-            "ConsoleWindows.dll",
-            CallingConvention = CallingConvention.Cdecl
+           "ConsoleWindows.dll",
+           CallingConvention = CallingConvention.Cdecl
         )]
-        public static extern void CopyBufferToScreenVT(
+        public static extern int SetScreenColors(
             nint consoleWindow,
-            ConsolePixel[] buffer,
-            int width,
-            int height,
-            int left,
-            int top
+            int numColors,
+            PaletteInfo[] paletteInfo
         );
         /// <summary>
         /// 
@@ -196,7 +195,7 @@ namespace Engine.Native
         )]
         public static extern void ClearScreen(
             nint consoleWindow,
-            ushort attributes,
+            ConsolePixel clearPixel,
             int width,
             int height,
             int left,

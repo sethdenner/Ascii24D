@@ -23,21 +23,21 @@ namespace Engine.Render
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="foregroundColor"></param>
-        /// <param name="backgroundColor"></param>
+        /// <param name="foregroundColorIndex"></param>
+        /// <param name="backgroundColorIndex"></param>
         /// <param name="character"></param>
         /// <param name="depth"></param>
         public Pixel(
-            Native.ConsoleColor foregroundColor,
-            Native.ConsoleColor backgroundColor,
+            byte foregroundColorIndex,
+            byte backgroundColorIndex,
             byte character,
             int depth
         )
         {
             PixelDescription = new ConsolePixel()
             {
-                ForegroundColor = foregroundColor,
-                BackgroundColor = backgroundColor,
+                ForegroundColorIndex = foregroundColorIndex,
+                BackgroundColorIndex = backgroundColorIndex,
                 CharacterCode = character
             };
             PixelDepth = depth;

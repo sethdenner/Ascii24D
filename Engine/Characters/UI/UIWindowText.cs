@@ -20,35 +20,36 @@ namespace Engine.Characters.UI
             int width,
             int height,
             Vector3 position,
+            ConsolePixel backgroundPixel,
+            ConsolePixel borderPixel,
+            byte textForegroundColorIndex,
+            byte textBackgroundColorIndex,
             string windowText = ""
-        ) : base(width, height, position)
+        ) : base(width, height, position, backgroundPixel, borderPixel)
         {
             Text = windowText;
-            BackgroundColor = new Native.ConsoleColor() { };
-            ForegroundColor = new Native.ConsoleColor() { 
-                R = 255, G = 255, B = 255 
-            };
+            ForegroundColorIndex = textForegroundColorIndex;
+            BackgroundColorIndex = textBackgroundColorIndex;
         }
         /// <summary>
         /// 
         /// </summary>
         public override void GenerateSprites()
         {
+            base.GenerateSprites();
             int windowPositionX = (int)Math.Floor(Position.X);
             int windowPositionY = (int)Math.Floor(Position.Y);
-            base.GenerateSprites();
             Sprite textSprite = new(
                 Width - PaddingRight - PaddingLeft - windowPositionX - BorderWidth,
                 Height - PaddingTop - PaddingBottom - windowPositionY - BorderWidth,
                 PaddingLeft + windowPositionX + BorderWidth,
                 PaddingTop + windowPositionY + BorderWidth
             );
-            textSprite.Fill(PixelManager.CreatePixel(
-                ForegroundColor,
-                BackgroundColor,
-                (byte)' ',
-                (int)Math.Floor(Position.Z) + 1
-            ));
+            textSprite.Fill(new ConsolePixel() {
+                ForegroundColorIndex = ForegroundColorIndex,
+                BackgroundColorIndex = BackgroundColorIndex,
+                CharacterCode = (byte)' '
+            });
 
             int newLineCount = 0;
             int newLineIndexOffset = 0;
@@ -75,12 +76,11 @@ namespace Engine.Characters.UI
                 textSprite.SetPixel(
                     x,
                     y,
-                    PixelManager.CreatePixel(
-                        ForegroundColor,
-                        BackgroundColor,
-                        (byte)Text[i],
-                        (int)Math.Floor(Position.Z) + 1
-                    )
+                    new ConsolePixel() {
+                        ForegroundColorIndex = ForegroundColorIndex,
+                        BackgroundColorIndex = BackgroundColorIndex,
+                        CharacterCode = (byte)Text[i]
+                    }
                 );
             }
 
@@ -101,10 +101,10 @@ namespace Engine.Characters.UI
         /// <summary>
         /// 
         /// </summary>
-        public Native.ConsoleColor ForegroundColor { get; set; }
+        public byte ForegroundColorIndex { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public Native.ConsoleColor BackgroundColor { get; set; }
+        public byte BackgroundColorIndex { get; set; }
     }
 }

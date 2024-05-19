@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Engine.Native;
 using Engine.Render;
 
 namespace Engine.Characters.UI
@@ -26,8 +27,8 @@ namespace Engine.Characters.UI
             Width = 0;
             Height = 0;
             Position = new Vector3();
-            BackgroundPixel = new Pixel();
-            BorderPixel = new Pixel(); ;
+            BackgroundPixel = new ConsolePixel();
+            BorderPixel = new ConsolePixel();
             BorderWidth = 0;
             ShowBorder = false;
             PaddingTop = 0;
@@ -51,35 +52,12 @@ namespace Engine.Characters.UI
         public UIWindow(
             int width,
             int height,
-            Vector3 position
+            Vector3 position,
+            ConsolePixel backgroundPixel,
+            ConsolePixel borderPixel
         ) : base() 
         {
             int depth = (int)Math.Floor(position.Z);
-            Pixel backgroundPixel = PixelManager.CreatePixel(
-                new Native.ConsoleColor() { },
-                new Native.ConsoleColor() {
-                    R = (byte)255, G = (byte)255, B = (byte)255
-                },
-                (byte)' ',
-                depth
-
-            );
-            Pixel borderPixel = PixelManager.CreatePixel(
-                new Native.ConsoleColor()
-                {
-                    R = (byte)125,
-                    G = (byte)125,
-                    B = (byte)125
-                },
-                new Native.ConsoleColor()
-                {
-                    R = (byte)50,
-                    G = (byte)50,
-                    B = (byte)50
-                },
-                (byte)'#',
-                depth
-            );
             Width = width;
             Height = height;
             Position = position;
@@ -141,8 +119,8 @@ namespace Engine.Characters.UI
             int width,
             int height,
             Vector3 position,
-            Pixel backgroundPixel,
-            Pixel borderPixel,
+            ConsolePixel backgroundPixel,
+            ConsolePixel borderPixel,
             int borderWidth,
             int paddingBottom,
             int paddingLeft,
@@ -212,8 +190,8 @@ namespace Engine.Characters.UI
             int width,
             int height,
             Vector3 position,
-            Pixel backgroundPixel,
-            Pixel borderPixel,
+            ConsolePixel backgroundPixel,
+            ConsolePixel borderPixel,
             int borderWidth,
             int paddingBottom = 0,
             int paddingLeft = 0,
@@ -334,10 +312,10 @@ namespace Engine.Characters.UI
         /// <summary>
         /// 
         /// </summary>
-        public Pixel BackgroundPixel { get; set; }
+        public ConsolePixel BackgroundPixel { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public Pixel BorderPixel { get; set; }
+        public ConsolePixel BorderPixel { get; set; }
     }
 }

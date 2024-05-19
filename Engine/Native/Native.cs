@@ -37,32 +37,6 @@
         /// console rows.
         ///</param>
         public static void CopyBufferToScreen(
-            CHAR_INFO[] buffer,
-            int width,
-            int height,
-            int left = 0,
-            int top = 0
-        )
-        {
-            NativeWindows.CopyBufferToScreen(
-                _consoleWindow,
-                buffer,
-                width,
-                height,
-                left,
-                top
-            );
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="bufferLength"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="left"></param>
-        /// <param name="top"></param>
-        public static void CopyBufferToScreenVT(
             ConsolePixel[] buffer,
             int width,
             int height,
@@ -70,7 +44,7 @@
             int top
         )
         {
-            NativeWindows.CopyBufferToScreenVT(
+            NativeWindows.CopyBufferToScreen(
                 _consoleWindow,
                 buffer,
                 width,
@@ -120,6 +94,16 @@
             WindowWidth = width;
             WindowHeight = height;
         }
+        public static void SetScreenColors(
+            int numColors,
+            PaletteInfo[] paletteInfo
+        ) {
+            NativeWindows.SetScreenColors(
+                _consoleWindow,
+                numColors,
+                paletteInfo
+            );
+        }
         /// <summary>
         /// <c>ClearScreen</c> is a static method that handles calling native
         /// core responsible for clearing the console window screen buffer.
@@ -144,7 +128,7 @@
         /// The top position of the area on the screen buffer to clear.
         /// </param>
         public static void ClearScreen(
-            ushort attributes,
+            ConsolePixel clearPixel,
             int width,
             int height,
             int left = 0,
@@ -153,7 +137,7 @@
         {
             NativeWindows.ClearScreen(
                 _consoleWindow,
-                attributes,
+                clearPixel,
                 width,
                 height,
                 left,

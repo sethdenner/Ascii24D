@@ -50,14 +50,11 @@ namespace Engine.Characters
             // Iterate over the counter string.
             for (int i = 0; i < countString.Length; ++i)
             {
-                sprite.SetPixel(i, PixelManager.CreatePixel(
-                    new Native.ConsoleColor() { },
-                    new Native.ConsoleColor() {
-                        R = (byte)255, G = (byte)255, B = (byte)255
-                    },
-                    (byte)countString[i],
-                    0
-                ));
+                sprite.SetPixel(i, new ConsolePixel {
+                    ForegroundColorIndex = ForegroundColorIndex,
+                    BackgroundColorIndex = BackgroundColorIndex,
+                    CharacterCode = (byte)countString[i]
+                });
             }
             // Clear any previous sprites.
             Sprites.Clear();
@@ -71,11 +68,11 @@ namespace Engine.Characters
         /// <summary>
         /// 
         /// </summary>
-        public Native.ConsoleColor ForegroundColor { get; private set; }
+        public byte ForegroundColorIndex { get; private set; }
         /// <summary>
         /// 
         /// </summary>
-        public Native.ConsoleColor BackgroundColor { get; private set; }
+        public byte BackgroundColorIndex { get; private set; }
         /// <summary>
         /// 
         /// </summary>

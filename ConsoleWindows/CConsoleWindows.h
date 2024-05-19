@@ -29,46 +29,15 @@ struct
 } typedef ConsoleColor;
 struct
 {
-	ConsoleColor ForegroundColor;
-	ConsoleColor BackgroundColor;
+	unsigned char ForegroundColorIndex;
+	unsigned char BackgroundColorIndex;
 	unsigned char CharacterCode;
 } typedef ConsolePixel;
+struct {
+	unsigned char Index;
+	ConsoleColor Color;
+} typedef PaletteInfo;
 
-enum COLOUR
-{
-	FG_BLACK = 0x0000,
-	FG_DARK_BLUE = 0x0001,
-	FG_DARK_GREEN = 0x0002,
-	FG_DARK_CYAN = 0x0003,
-	FG_DARK_RED = 0x0004,
-	FG_DARK_MAGENTA = 0x0005,
-	FG_DARK_YELLOW = 0x0006,
-	FG_GREY = 0x0007,
-	FG_DARK_GREY = 0x0008,
-	FG_BLUE = 0x0009,
-	FG_GREEN = 0x000A,
-	FG_CYAN = 0x000B,
-	FG_RED = 0x000C,
-	FG_MAGENTA = 0x000D,
-	FG_YELLOW = 0x000E,
-	FG_WHITE = 0x000F,
-	BG_BLACK = 0x0000,
-	BG_DARK_BLUE = 0x0010,
-	BG_DARK_GREEN = 0x0020,
-	BG_DARK_CYAN = 0x0030,
-	BG_DARK_RED = 0x0040,
-	BG_DARK_MAGENTA = 0x0050,
-	BG_DARK_YELLOW = 0x0060,
-	BG_GREY = 0x0070,
-	BG_DARK_GREY = 0x0080,
-	BG_BLUE = 0x0090,
-	BG_GREEN = 0x00A0,
-	BG_CYAN = 0x00B0,
-	BG_RED = 0x00C0,
-	BG_MAGENTA = 0x00D0,
-	BG_YELLOW = 0x00E0,
-	BG_WHITE = 0x00F0,
-};
 
 class CONSOLEWINDOWSDLL_API CConsoleWindows
 {
@@ -80,22 +49,41 @@ public:
 		int fontWidth,
 		int fontHeight
 	);
-    void CopyBufferToScreen(
-		const CHAR_INFO* buffer,
-		const short width,
-		const short height,
-		const short left,
-		const short top
-	);
-	void CopyBufferToScreenVT(
+	void CopyBufferToScreen(
 		const ConsolePixel* buffer,
 		const int width,
 		const int height,
 		const int left,
 		const int top
 	);
+	void CopyBufferToScreenWinApi(
+		const ConsolePixel* buffer,
+		const int width,
+		const int height,
+		const int left,
+		const int top
+	);
+	void CopyBufferToScreenVT100(
+		const ConsolePixel* buffer,
+		const int width,
+		const int height,
+		const int left,
+		const int top
+	);
+	int SetScreenColors(
+		const int numColors,
+		const PaletteInfo* paletteInfo
+	);
+	int SetScreenColorsVT100(
+		const int numColors,
+		const PaletteInfo* paletteInfo
+	);
+	int SetScreenColorsWinApi(
+		const int numColors,
+		const PaletteInfo* paletteInfo
+	);
 	void ClearScreen(
-		const unsigned short attributes,
+		const ConsolePixel clearPixel,
 		const short width,
 		const short height,
 		const short left,
@@ -145,23 +133,20 @@ extern "C"
 	);
 	CONSOLEWINDOWSDLL_API void CopyBufferToScreen(
 		CConsoleWindows* consoleWindow,
-		const CHAR_INFO* buffer,
-		const int width,
-		const int height,
-		const int left,
-		const int top
-	);
-	CONSOLEWINDOWSDLL_API void CopyBufferToScreenVT(
-		CConsoleWindows* consoleWindow,
 		const ConsolePixel* buffer,
 		const int width,
 		const int height,
 		const int left,
 		const int top
 	);
+	CONSOLEWINDOWSDLL_API int SetScreenColors(
+		CConsoleWindows* consoleWindow,
+		const int numColors,
+		const PaletteInfo* paletteInfo
+	);
 	CONSOLEWINDOWSDLL_API void ClearScreen(
 		CConsoleWindows* consoleWindow,
-		const WORD attributes,
+		const ConsolePixel clearPixel,
 		const short width,
 		const short height,
 		const short left,

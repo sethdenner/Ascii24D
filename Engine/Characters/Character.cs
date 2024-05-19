@@ -37,30 +37,11 @@ namespace Engine.Characters
                 child.Render(renderTarget);
             }
             GenerateSprites();
-            // Calculate the total width and height.
-            int width = 0;
-            int height = 0;
-            for (int i = 0; i < Sprites.Count; ++i)
-            {
-                Sprite sprite = Sprites[i];
-                int newWidth = sprite.Width;
-                if (width < newWidth)
-                    width = newWidth;
-
-                int newHeight = sprite.Height;
-                if (height < newHeight)
-                    height = newHeight;
-            }
             // Composite all the sprites.
             for (int i = 0; i < Sprites.Count; ++i)
             {
                 Sprite sprite = Sprites[i];
-                // What the heck am I even doing with EdgeBehavior here?
-                // Is this really correct?
-                EdgeBehavior pushedBehavior = renderTarget.EdgeBehavior;
-                renderTarget.EdgeBehavior = sprite.EdgeBehavior;
                 renderTarget.MergeSprite(sprite);
-                renderTarget.EdgeBehavior = pushedBehavior;
             }
         }
         /// <summary>

@@ -102,6 +102,19 @@ int CConsoleWindows::InitializeConsole(
 	if (!SetConsoleWindowInfo(_consoleHandle, TRUE, &_rectWindow))
 		return Error(L"SetConsoleWindowInfo");
 
+	// Set flags to hide cursor
+	CONSOLE_CURSOR_INFO cursorInfo;
+	GetConsoleCursorInfo(_consoleHandle, &cursorInfo);
+	cursorInfo.bVisible = false;
+	cursorInfo.dwSize = 1;
+	SetConsoleCursorInfo(_consoleHandle, &cursorInfo);
+
+	// Hide scroll bars.
+	ShowScrollBar(GetConsoleWindow(), SB_BOTH, FALSE);
+
+	// Set window fully opaque.
+	SetLayeredWindowAttributes(GetActiveWindow(), NULL, 255, LWA_ALPHA);
+
 	// Set flags to allow mouse input		
 	if (!SetConsoleMode(
 		_consoleHandleIn,
@@ -156,30 +169,22 @@ BOOL CConsoleWindows::OnClose(DWORD evt)
 	}
 	return true;
 }
-
 void CConsoleWindows::CopyBufferToScreen(
-	const CHAR_INFO* buffer,
-	const short width,
-	const short height,
-	const short left,
-	const short top
+	const ConsolePixel* buffer,
+	const int width,
+	const int height,
+	const int left,
+	const int top
 ) {
-    COORD bufferSize = { width, height };
-    bufferSize.X = width;
-    bufferSize.Y = height;
-    COORD bufferCoord = {};
-    SMALL_RECT writeRegion = { top, left, left + width, top + height};
-
-    WriteConsoleOutput(
-		_consoleHandle,
-        buffer,
-        bufferSize,
-        bufferCoord,
-        &writeRegion
-    );
-
+	CopyBufferToScreenWinApi(
+		buffer,
+		width,
+		height,
+		left,
+		top
+	);
 }
-void CConsoleWindows::CopyBufferToScreenVT(
+void CConsoleWindows::CopyBufferToScreenVT100(
 	const ConsolePixel* buffer,
 	const int width,
 	const int height,
@@ -188,38 +193,23 @@ void CConsoleWindows::CopyBufferToScreenVT(
 ) {
 	std::wostringstream output;
 	int bufferLength = width * height;
-	int currentRow = 0;
-	COORD bufferCoord = {};
 	output << CURSOR_MOVE(left, top);
 	ConsolePixel previousPixel = {};
 	for (int i = 0; i < bufferLength; ++i)
 	{
 		const ConsolePixel pixel = buffer[i];
-		if (0 == pixel.CharacterCode)
-		{
+		if (0 == pixel.CharacterCode) {
 			continue;
 		}
 		if (
-			pixel.ForegroundColor.R != previousPixel.ForegroundColor.R ||
-			pixel.ForegroundColor.G != previousPixel.ForegroundColor.G ||
-			pixel.ForegroundColor.B != previousPixel.ForegroundColor.B
+			pixel.ForegroundColorIndex != previousPixel.ForegroundColorIndex
 		) {
-			output << COLOR_FG(
-				pixel.ForegroundColor.R,
-				pixel.ForegroundColor.G,
-				pixel.ForegroundColor.B
-			);
+			output << COLOR_FG_I(pixel.ForegroundColorIndex);
 		}
 		if (
-			pixel.BackgroundColor.R != previousPixel.BackgroundColor.R ||
-			pixel.BackgroundColor.G != previousPixel.BackgroundColor.G ||
-			pixel.BackgroundColor.B != previousPixel.BackgroundColor.B
+			pixel.BackgroundColorIndex != previousPixel.BackgroundColorIndex
 		) {
-			output << COLOR_BG(
-				pixel.BackgroundColor.R,
-				pixel.BackgroundColor.G,
-				pixel.BackgroundColor.B
-			);
+			output << COLOR_BG_I(pixel.BackgroundColorIndex);
 		}
 		output << (char)pixel.CharacterCode;
 		previousPixel = pixel;
@@ -235,9 +225,119 @@ void CConsoleWindows::CopyBufferToScreenVT(
 		NULL
 	);
 }
+void CConsoleWindows::CopyBufferToScreenWinApi(
+	const ConsolePixel* buffer,
+	const int width,
+	const int height,
+	const int left,
+	const int top
+) {
+	std::wostringstream output;
+	int bufferLength = width * height;
+	CHAR_INFO* charInfo = new CHAR_INFO[bufferLength];
+	for (int i = 0; i < bufferLength; ++i) {
+		ConsolePixel pixel = buffer[i];
+		charInfo[i] = {
+			pixel.CharacterCode,
+			static_cast<WORD>(
+				pixel.ForegroundColorIndex |
+				(pixel.BackgroundColorIndex << 4)
+			)
+		};
+	}
+
+	COORD bufferSize = {width, height};
+	COORD bufferCoord = {};
+	SMALL_RECT writeRegion = {
+		left, // Left
+		top, // Top
+		width, // Right
+		height // Bottom
+	};
+
+	WriteConsoleOutput(
+		_consoleHandle,
+		charInfo,
+		bufferSize,
+		bufferCoord,
+		&writeRegion
+	);
+
+	delete[] charInfo;
+}
+int CConsoleWindows::SetScreenColors(
+	const int numColors,
+	const PaletteInfo* paletteInfo
+) {
+	return SetScreenColorsWinApi(
+		numColors,
+		paletteInfo
+	);
+}
+
+int CConsoleWindows::SetScreenColorsVT100(
+	const int numColors,
+	const PaletteInfo* paletteInfo
+) {
+	int result = 0; // OK
+	std::wostringstream output;
+	for (int i = 0; i < numColors; ++i) {
+		PaletteInfo info = paletteInfo[i];
+		output << SET_PALETTE_COLOR(info.Index, info.Color.R, info.Color.G, info.Color.B);
+	}
+
+	std::wstring outputString = output.str();
+	DWORD charsWritten = 0;
+	result += 1 ^ WriteConsole(
+		_consoleHandle,
+		outputString.c_str(),
+		outputString.length(),
+		&charsWritten,
+		NULL
+	);
+	return result;
+}
+
+int CConsoleWindows::SetScreenColorsWinApi(
+	const int numColors,
+	const PaletteInfo* paletteInfo
+) {
+	int result = 0; // OK
+	CONSOLE_SCREEN_BUFFER_INFOEX screenBufferInfo = {};
+	screenBufferInfo.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+	result += 1 ^ GetConsoleScreenBufferInfoEx(
+		_consoleHandle,
+		&screenBufferInfo
+	);
+	screenBufferInfo.wAttributes = (
+		FOREGROUND_RED |
+		FOREGROUND_GREEN |
+		FOREGROUND_BLUE
+	);
+
+	if (result) { return result; }
+
+	for (int i = 0; i < numColors; ++i) {
+		PaletteInfo pInfo = paletteInfo[i];
+		screenBufferInfo.ColorTable[pInfo.Index] = RGB(
+			pInfo.Color.R,
+			pInfo.Color.G,
+			pInfo.Color.B
+		);
+	}
+
+	result += 1 ^ SetConsoleScreenBufferInfoEx(
+		_consoleHandle,
+		&screenBufferInfo
+	);
+
+	if (result) { return result; }
+
+	return result;
+}
 
 void CConsoleWindows::ClearScreen(
-	const unsigned short attributes,
+	const ConsolePixel clearPixel,
 	const short width,
 	const short height,
 	const short left,
@@ -250,13 +350,12 @@ void CConsoleWindows::ClearScreen(
 	SMALL_RECT writeRegion = { top, left, left + width, top + height };
 
 	const int bufferSize = width * height;
-	CHAR_INFO* buffer = new CHAR_INFO[bufferSize]();
-	memset((void*)buffer, 0, sizeof(CHAR_INFO) * bufferSize);
+	ConsolePixel* buffer = new ConsolePixel[bufferSize]();
+	memset(buffer, 0, sizeof(CHAR_INFO) * bufferSize);
 
 	for (int i = 0; i < bufferSize; ++i)
 	{
-		buffer[i].Char.AsciiChar = ' ';
-		buffer[i].Attributes = attributes;
+		buffer[i] = clearPixel;
 	}
 
 	CopyBufferToScreen(buffer, width, height, left, top);
@@ -343,24 +442,6 @@ int InitializeConsole(
 }
 
 void CopyBufferToScreen(
-	CConsoleWindows*
-	consoleWindow,
-	const CHAR_INFO* buffer,
-	const int width,
-	const int height,
-	const int left,
-	const int top
-) {
-    consoleWindow->CopyBufferToScreen(
-        buffer,
-        width,
-        height,
-        left,
-        top
-    );
-}
-
-void CopyBufferToScreenVT(
 	CConsoleWindows* consoleWindow,
 	const ConsolePixel* buffer,
 	const int width,
@@ -368,12 +449,23 @@ void CopyBufferToScreenVT(
 	const int left,
 	const int top
 ) {
-	consoleWindow->CopyBufferToScreenVT(
+	consoleWindow->CopyBufferToScreen(
 		buffer,
 		width,
 		height,
 		left,
 		top
+	);
+}
+
+int SetScreenColors(
+	CConsoleWindows* consoleWindow,
+	const int numColors,
+	const PaletteInfo* paletteInfo
+) {
+	return consoleWindow->SetScreenColors(
+		numColors,
+		paletteInfo
 	);
 }
 
@@ -393,14 +485,14 @@ bool HandleWindowResize(
 
 void ClearScreen(
 	CConsoleWindows* consoleWindow,
-	const WORD attributes,
+	const ConsolePixel clearPixel,
 	const short width,
 	const short height,
 	const short left,
 	const short top
 ) {
 	consoleWindow->ClearScreen(
-		attributes,
+		clearPixel,
 		width,
 		height,
 		left,
