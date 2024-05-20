@@ -45,23 +45,21 @@ namespace Peer2PeerNetworkingDemo
                 $"Starting network in \"{mode}\" mode"
             );
             SocketUdp socket = new SocketUdp();
-            P2PClient server = new P2PClient(socket, async (endPoint, data) => {
-                return await Task<Packet?>.Run(Packet? () => {
-                    Packet? packet = null;
-                    IPEndPoint? ipEndPoint = endPoint as IPEndPoint;
-                    if (null == ipEndPoint) return packet;
-                    PacketType packetType = Packet.GetPacketType(data);
-                    if (PacketType.NUM_TYPES + 1 == packetType) {
-                        packet = new MyPacket();
-                        packet.FromBinary(data);
-                    }
-                    Console.WriteLine(
-                        $"Packet received from {ipEndPoint.Address}:" +
-                        $"{ipEndPoint.Port} " +
-                        $"of type {packetType}."
-                    );
-                    return packet;
-                });
+            P2PClient server = new P2PClient(socket, (endPoint, data) => {
+                Packet? packet = null;
+                IPEndPoint? ipEndPoint = endPoint as IPEndPoint;
+                if (null == ipEndPoint) return packet;
+                PacketType packetType = Packet.GetPacketType(data);
+                if (PacketType.NUM_TYPES + 1 == packetType) {
+                    packet = new MyPacket();
+                    packet.FromBinary(data);
+                }
+                Console.WriteLine(
+                    $"Packet received from {ipEndPoint.Address}:" +
+                    $"{ipEndPoint.Port} " +
+                    $"of type {packetType}."
+                );
+                return packet;
             }, isDedicated);
             Task<int> serverStart = server.Start();
             if (isDedicated)

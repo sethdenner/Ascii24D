@@ -40,59 +40,53 @@ namespace EngineIntegrationTests {
             bool client0PacketReceived = false;
             bool client1PacketReceived = false;
             var client0 = new P2PClient(socket0,
-                async (endPoint, packetData) => {
-                    return await Task<Packet?>.Run(Packet? () => {
-                        PacketType packetType = Packet.GetPacketType(
-                            packetData
-                        );
-                        if (TestPacket.PACKET_TYPE == packetType) {
-                            client0PacketReceived = true;
-                            TestPacket packet = new TestPacket();
-                            packet.FromBinary(packetData);
-                            return packet;
-                        } else {
-                            return null;
-                        }
-                    });
+                (endPoint, packetData) => {
+                    PacketType packetType = Packet.GetPacketType(
+                        packetData
+                    );
+                    if (TestPacket.PACKET_TYPE == packetType) {
+                        client0PacketReceived = true;
+                        TestPacket packet = new TestPacket();
+                        packet.FromBinary(packetData);
+                        return packet;
+                    } else {
+                        return null;
+                    }
                 }
             );
 
             var client1 = new P2PClient(
                 socket1,
-                async (endPoint, packetData) => {
-                    return await Task<Packet?>.Run(Packet? () => {
-                        PacketType packetType = Packet.GetPacketType(
-                            packetData
-                        );
-                        if (TestPacket.PACKET_TYPE == packetType) {
-                            client1PacketReceived = true;
-                            TestPacket packet = new TestPacket();
-                            packet.FromBinary(packetData);
-                            return packet;
-                        } else {
-                            return null;
-                        }
-                    });
+                (endPoint, packetData) => {
+                    PacketType packetType = Packet.GetPacketType(
+                        packetData
+                    );
+                    if (TestPacket.PACKET_TYPE == packetType) {
+                        client1PacketReceived = true;
+                        TestPacket packet = new TestPacket();
+                        packet.FromBinary(packetData);
+                        return packet;
+                    } else {
+                        return null;
+                    }
                 }
             );
 
-            var server = new P2PClient(serverSocket, async (
+            var server = new P2PClient(serverSocket, (
                     endpoint,
                     packetData
                 ) => {
-                    return await Task<Packet?>.Run(Packet? () => {
-                        PacketType packetType = Packet.GetPacketType(
-                            packetData
-                        );
-                        if (TestPacket.PACKET_TYPE == packetType) {
-                            client1PacketReceived = true;
-                            TestPacket packet = new TestPacket();
-                            packet.FromBinary(packetData);
-                            return packet;
-                        } else {
-                            return null;
-                        }
-                    });
+                    PacketType packetType = Packet.GetPacketType(
+                        packetData
+                    );
+                    if (TestPacket.PACKET_TYPE == packetType) {
+                        client1PacketReceived = true;
+                        TestPacket packet = new TestPacket();
+                        packet.FromBinary(packetData);
+                        return packet;
+                    } else {
+                        return null;
+                    }
                 },
                 true
             );

@@ -1,18 +1,30 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Engine.Network
-{
+namespace Engine.Network {
     /// <summary>
     /// 
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public abstract class Packet
-    {
+    public abstract class Packet {
         /// <summary>
         /// 
         /// </summary>
-        public static int PacketSize
-        {
+        public abstract PacketType PacketType {
+            get;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int Sequence {
+            get; set;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <summary>
+        /// 
+        /// </summary>
+        public static int PacketSize {
             get {
                 return sizeof(int) +
                     sizeof(PacketType);
@@ -25,27 +37,14 @@ namespace Engine.Network
         public virtual int GetSize() {
             return PacketSize;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        public abstract PacketType PacketType { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public int Sequence { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public Packet()
-        {
+        public Packet() {
             Sequence = 0;
         }
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public virtual Memory<byte> ToBinary()
-        {
+        public virtual Memory<byte> ToBinary() {
             Memory<byte> packet = new byte[PacketSize];
             Memory<byte> packetTypeBytes =
                 BitConverter.GetBytes((int)PacketType);
@@ -63,8 +62,7 @@ namespace Engine.Network
         /// 
         /// </summary>
         /// <param name="data"></param>
-        public virtual void FromBinary(Memory<byte> data)
-        {
+        public virtual void FromBinary(Memory<byte> data) {
             int spanStart = sizeof(PacketType);
             Sequence = BitConverter.ToInt32(
                 data[spanStart..(spanStart += sizeof(int))].Span
@@ -75,11 +73,25 @@ namespace Engine.Network
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static PacketType GetPacketType(Memory<byte> data)
-        {
+        public static PacketType GetPacketType(Memory<byte> data) {
             return (PacketType)BitConverter.ToInt32(
                 data[..sizeof(PacketType)].Span
             );
+        }
+        /// <summary>
+        /// Deserializes the sequence value in a binaray serialized packet
+        /// buffer.
+        /// </summary>
+        /// <param name="data">
+        /// A buffer containing serialized packet data.
+        /// </param>
+        /// <returns>
+        /// returns an integer representing the packets sequence value.
+        /// </returns>
+        public static int GetPacketSequence(Memory<byte> data) {
+            return BitConverter.ToInt32(data[
+                sizeof(PacketType)..(sizeof(PacketType) + sizeof(int))
+            ].Span);
         }
     }
 }

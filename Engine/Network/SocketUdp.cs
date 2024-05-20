@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
 namespace Engine.Network
@@ -51,24 +52,21 @@ namespace Engine.Network
         /// <param name="buffer"></param>
         /// <param name="remoteEndPoint"></param>
         /// <returns></returns>
+        /// <exception cref="OperationCanceledException">
+        /// <c>OperationCanceledException</c> is thrown when the
+        /// <c>CancellationToken</c> has been canceled.
+        /// </exception>"
         public async Task<SocketReceiveFromResult> ReceiveFromAsync(
             Memory<byte> buffer,
             IPEndPoint remoteEndPoint,
             CancellationToken token
         ) {
-            try {
-                return await Socket.ReceiveFromAsync(
-                    buffer,
-                    SocketFlags.None,
-                    remoteEndPoint,
-                    token
-                );
-            } catch (OperationCanceledException) {
-                return new SocketReceiveFromResult() {
-                    ReceivedBytes = 0,
-                    RemoteEndPoint = remoteEndPoint
-                };
-            }
+            return await Socket.ReceiveFromAsync(
+                buffer,
+                SocketFlags.None,
+                remoteEndPoint,
+                token
+            );
         }
         /// <summary>
         /// 

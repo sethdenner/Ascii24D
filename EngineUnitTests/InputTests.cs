@@ -3,6 +3,7 @@ using SharpDX.DirectInput;
 using Moq;
 using Engine.Core;
 using Engine.Input;
+using Engine.Network;
 
 namespace EngineTests
 {
