@@ -10,16 +10,23 @@ namespace Engine.Characters
     /// in the form of sprites and behavor defined in methods that manipulate
     /// those sprites.
     /// </summary>
-    public abstract class Character : Entity
+    [Serializable]
+    public abstract class Character : ICharacter
     {
         /// <summary>
-        /// <c>Character</c> constructor. Initialzies the sprites <c>List</c>.
+        /// 
         /// </summary>
-        public Character() : base()
-        {
-            // Initialize the _sprites List to empty.
-            _sprites = new List<Sprite>();
-        }
+        public List<ICharacter> Children {
+            get; set;
+        } = [];
+        /// <summary>
+        /// 
+        /// </summary>
+        public Vector3 Position { get; set; }
+        /// <summary>
+        /// <c>Sprties</c> is a property that publicly exposes the <c>Sprites</c> <c>List</c>.
+        /// </summary>
+        public List<Sprite> Sprites { get; set; } = [];
         /// <summary>
         /// The <c>Render</c> method compiles all of the elements
         /// returned by the <c>Sprites</c> property. 
@@ -45,11 +52,20 @@ namespace Engine.Characters
             }
         }
         /// <summary>
+        /// <c>AddChild</c> is a method that adds a user interface
+        /// component to the <c>List</c> of children user interface
+        /// components.
+        /// </summary>
+        /// <param name="child"></param>
+        public virtual void AddChild(ICharacter child) {
+            Children.Add(child);
+        }
+        /// <summary>
         /// <c>RegisterInputHandlers</c> override this method to register
         /// input handlers. Gets called once per application start after
         /// input devices have been enumerated.
         /// </summary>
-        public virtual void RegisterInputHandlers() { }
+        public abstract void RegisterInputHandlers();
         /// <summary>
         /// <c>GenerateSprites</c> is an <c>abstract</c> method. The logic for
         /// generating the sprites that comprise of the user interface component.
@@ -58,36 +74,5 @@ namespace Engine.Characters
         /// <c>Character</c> base class.
         /// </summary>
         public abstract void GenerateSprites();
-        /// <summary>
-        /// <c>_sprites</c> is a <c>List</c> collection of <c>Sprite</c> objects
-        /// that comprise the character.
-        /// </summary>
-        protected List<Sprite> _sprites;
-        /// <summary>
-        /// <c>Update</c> method handles simulating the character to the state
-        /// at specified time <c>elapsedSeconds</c>. Calls out to other methods
-        /// that handle simulating the character properties using various game
-        /// systems (i.e. physics, procedural behavior, etc.)
-        /// </summary>
-        /// <param name="elapsedSeconds"></param>
-        public virtual void Update(float elapsedSeconds)
-        {
-            ApplyPhysics(elapsedSeconds);
-        }
-        /// <summary>
-        /// <c>ApplyPhysics</c> method should be overridden implementing
-        /// whatever physics API the game is using. Calling out to the api
-        /// keeps the character realitivly decoupled from the physics api.
-        /// </summary>
-        /// <param name="elapsedSeconds"></param>
-        public virtual void ApplyPhysics(float elapsedSeconds) { }
-        /// <summary>
-        /// <c>Sprties</c> is a property that publicly exposes the <c>_sprites</c> <c>List</c>.
-        /// </summary>
-        public List<Sprite> Sprites { get { return _sprites; } }
-        /// <summary>
-        /// 
-        /// </summary>
-        public Vector3 Position { get; set; }
     }
 }

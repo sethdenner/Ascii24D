@@ -30,5 +30,9 @@ namespace Engine.Characters
 
             //Keybinds.
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        public override void RegisterInputHandlers() { }
     }
 }

@@ -628,11 +628,10 @@ namespace Engine.Network {
                     // Receiving data has been stopped by consuming application.
                     break;
                 }
-                IPEndPoint? remoteEP = result.RemoteEndPoint as IPEndPoint;
-                if (null == remoteEP)
+                if (result.RemoteEndPoint is not IPEndPoint remoteEP)
                     continue;
                 errorCode = HandleReceivedData(
-                    remoteEP as IPEndPoint,
+                    remoteEP,
                     memoryBuffer,
                     result.ReceivedBytes
                 );
