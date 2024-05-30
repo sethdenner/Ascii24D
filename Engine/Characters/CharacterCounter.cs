@@ -61,6 +61,9 @@ namespace Engine.Characters
             // Add the newly generated sprite.
             Sprites.Add(sprite);
         }
+
+        public override void RegisterInputHandlers() { }
+
         /// <summary>
         /// 
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using Engine.Native;
+using System.Numerics;
 
 namespace Engine.Render
 {
@@ -59,17 +60,25 @@ namespace Engine.Render
         /// An instance of <c>Sprite</c> to blend.
         /// </param>
         /// <returns><c>this</c></returns>
-        public Sprite MergeSprite(
-            Sprite sprite
-        ) {
-            for (int y = 0; y < sprite.Height; ++y) {
+        public Sprite MergeSprite(Sprite sprite) {
+            int renderHeight = Math.Min(
+                Height - sprite.OffsetY,
+                sprite.Height
+            );
+            for (int y = 0; y < renderHeight; ++y) {
                 int clampedWidth = sprite.Width;
-                if (clampedWidth > Width) {
-                    clampedWidth = Width;
+                if (clampedWidth > Width - sprite.OffsetX) {
+                    clampedWidth = Width - sprite.OffsetX;
                 }
-                int rhsStart = y * clampedWidth;
+                
+                if (0 >= clampedWidth) {
+                    break;
+                }
+                int rhsStart = y * sprite.Width;
+                int lhsStart =
+                    (y + sprite.OffsetY) *
+                    Width + sprite.OffsetX;
                 int rhsEnd = rhsStart + clampedWidth;
-                int lhsStart = (y + sprite.OffsetY) * Width + sprite.OffsetX;
                 int lhsEnd = lhsStart + clampedWidth;
                 sprite.BufferPixels.AsSpan()[rhsStart..rhsEnd].CopyTo(
                     BufferPixels.AsSpan()[lhsStart..lhsEnd]

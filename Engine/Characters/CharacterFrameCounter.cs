@@ -44,11 +44,10 @@ namespace Engine.Characters
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="elapsedSeconds"></param>
-        public override void Update(float elapsedSeconds)
+        /// <param name="step"></param>
+        public void Update(long step)
         {
-            _frameTimes.Add(elapsedSeconds);
-
+            _frameTimes.Add(step);
             float frameTimeSum = 0;
             for (int i = 0; i < _frameTimes.Count; ++i)
             {
@@ -57,11 +56,11 @@ namespace Engine.Characters
 
             if (frameTimeSum > _updateEverySeconds)
             {
+
                 float frameTimeAverage = frameTimeSum / _frameTimes.Count;
                 _fps = Math.Floor(1.0f / frameTimeAverage);
                 _frameTimes.Clear();
             }
-
         }
         /// <summary>
         /// 
@@ -85,6 +84,9 @@ namespace Engine.Characters
             Sprites.Clear();
             Sprites.Add(sprite);
         }
+
+        public override void RegisterInputHandlers() { }
+
         /// <summary>
         /// 
         /// </summary>

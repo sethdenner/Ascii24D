@@ -116,7 +116,7 @@ namespace Engine.Characters.UI
         /// of connected input devices.
         /// </summary>
         /// <param name="elapsedSeconds">The total application execution time in seconds.</param>
-        public override void Update(float elapsedSeconds)
+        public void Update(float elapsedSeconds)
         {
             // store all the text for the text window in debugText variable.
             List<string> debugText = new List<string>();
