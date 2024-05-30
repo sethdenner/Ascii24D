@@ -28,7 +28,7 @@ namespace EngineTests
             var mockJoystickInputDevice = new Mock<Engine.Input.InputDeviceJoystick>();
             // Define a mock DirectInput wrapper instance.
             var mockDirectInput = new Mock<Engine.Input.IDirectInput>();
-            // Setup GetDeviceType call for each DeviceInstance.
+            // Startup GetDeviceType call for each DeviceInstance.
             mockMouseDeviceInstance.Setup(
                 deviceInstance => deviceInstance.GetDeviceType()
             ).Returns(DeviceType.Mouse);
@@ -38,7 +38,7 @@ namespace EngineTests
             mockJoystickDeviceInstance.Setup(
                 deviceInstance => deviceInstance.GetDeviceType()
             ).Returns(DeviceType.Joystick);
-            // Setup DetDeviceType call for each InputDevice
+            // Startup DetDeviceType call for each InputDevice
             mockMouseInputDevice.Setup(
                deviceInstance => deviceInstance.GetDeviceType()
             ).Returns(DeviceType.Mouse);
@@ -48,7 +48,7 @@ namespace EngineTests
             mockJoystickInputDevice.Setup(
                 deviceInstance => deviceInstance.GetDeviceType()
             ).Returns(DeviceType.Joystick);
-            // Setup GetUpdates call for each InputDevice.
+            // Startup GetUpdates call for each InputDevice.
             mockMouseInputDevice.Setup(
                 inputDevice => inputDevice.GetUpdates()
             ).Returns([
@@ -67,7 +67,7 @@ namespace EngineTests
                 new JoystickUpdate() { },
                 new JoystickUpdate() { }]
             );
-            // Setup GetDevices call for the DirectInput wrapper.
+            // Startup GetDevices call for the DirectInput wrapper.
             mockDirectInput.Setup(
                 directInput => directInput.GetDevices()
             ).Returns(new List<IDeviceInstance>([
@@ -75,7 +75,7 @@ namespace EngineTests
                 mockKeyboardDeviceInstance.Object,
                 mockJoystickDeviceInstance.Object
             ]));
-            // Setup CreateInputDevice call for each DeviceInstance type.
+            // Startup CreateInputDevice call for each DeviceInstance type.
             mockDirectInput.Setup(
                 directInput => directInput.CreateInputDevice(mockMouseDeviceInstance.Object)
             ).Returns(mockMouseInputDevice.Object);
@@ -113,7 +113,7 @@ namespace EngineTests
             int joystickMessageRecieved = 0;
             int keyboardMessageRecieved = 0;
             int mouseMessageRecieved = 0;
-            // Setup handlers to check if input messages are sent properly.
+            // Startup handlers to check if input messages are sent properly.
             Messenger<JoystickMessage>.Register((device, update) => {
                 ++joystickMessageRecieved;
             });

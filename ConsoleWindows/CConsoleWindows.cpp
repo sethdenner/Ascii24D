@@ -113,15 +113,14 @@ int CConsoleWindows::InitializeConsole(
 	ShowScrollBar(GetConsoleWindow(), SB_BOTH, FALSE);
 
 	// Set window fully opaque.
-	SetLayeredWindowAttributes(GetActiveWindow(), NULL, 255, LWA_ALPHA);
+	SetLayeredWindowAttributes(GetConsoleWindow(), NULL, 255, LWA_ALPHA);
 
 	// Set flags to allow mouse input		
 	if (!SetConsoleMode(
 		_consoleHandleIn,
 		ENABLE_EXTENDED_FLAGS |
 		ENABLE_WINDOW_INPUT |
-		ENABLE_MOUSE_INPUT |
-		ENABLE_VIRTUAL_TERMINAL_PROCESSING
+		ENABLE_MOUSE_INPUT
 	)) return Error(L"SetConsoleMode");
 
 	// Allocate memory for screen buffer
@@ -351,7 +350,7 @@ void CConsoleWindows::ClearScreen(
 
 	const int bufferSize = width * height;
 	ConsolePixel* buffer = new ConsolePixel[bufferSize]();
-	memset(buffer, 0, sizeof(CHAR_INFO) * bufferSize);
+	memset(buffer, 0, sizeof(ConsolePixel) * bufferSize);
 
 	for (int i = 0; i < bufferSize; ++i)
 	{

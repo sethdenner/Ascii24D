@@ -62,8 +62,8 @@ namespace Engine.Characters.UI
             Height = height;
             Position = position;
             BackgroundPixel = backgroundPixel;
-            BorderPixel = borderPixel; ;
-            BorderWidth = 1;
+            BorderPixel = borderPixel;
+            BorderWidth = 0;
             ShowBorder = true;
             PaddingTop = 0;
             PaddingBottom = 0;
@@ -248,7 +248,7 @@ namespace Engine.Characters.UI
                 }
             }
 
-            _sprites = [windowSprite];
+            Sprites = [windowSprite];
         }
         /// <summary>
         /// 
@@ -258,21 +258,27 @@ namespace Engine.Characters.UI
         {
             if (0 == window.Width && 0 == window.Height)
             {
+                int positionX = (int)Math.Floor(Position.X);
+                int positionY = (int)Math.Floor(Position.Y);
                 window.Width = 
-                    Width - (2 * BorderWidth) -
+                    Width - positionX - (2 * BorderWidth) -
                     PaddingLeft - PaddingRight;
-                window.Height = Height - (2 * BorderWidth) -
+                window.Height = Height - positionY - (2 * BorderWidth) -
                     PaddingTop - PaddingBottom;
             }
 
             window.Position = new Vector3(
-                window.Position.X + BorderWidth,
-                window.Position.Y + BorderWidth,
+                window.Position.X + Position.X + BorderWidth,
+                window.Position.Y + Position.Y + BorderWidth,
                 (int)Math.Floor(Position.Z + 1)
             );
 
             AddChild(window);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        public override void RegisterInputHandlers() { }
         /// <summary>
         /// 
         /// </summary>

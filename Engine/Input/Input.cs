@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -95,18 +96,28 @@ namespace Engine.Input
     /// enumerate devices, signal device state updates and maintaining the
     /// current input state.
     /// </summary>
-    public class Input
-    {
+    /// <remarks>
+    /// <c>Input</c> constuctor. Intializes standard collection members to
+    /// empty collections. Instantiates the <c>DirectInput</c> wrapper
+    /// instance.
+    /// </remarks>
+    public class Input(IDirectInput directInputWrapper) {
         /// <summary>
-        /// <c>Input</c> constuctor. Intializes standard collection members to
-        /// empty collections. Instantiates the <c>DirectInput</c> wrapper
-        /// instance.
+        /// <c>_inputDevices</c> is a <c>List</c> of <c>InputDevice</c>
+        /// instances representing all supported and enumarated devices
+        /// connected to the system.
         /// </summary>
-        public Input(IDirectInput directInputWrapper)
-        {
-            _inputDevices = new List<InputDevice>();
-            _directInput = directInputWrapper;
-        }
+        public List<InputDevice> Devices = [];
+        /// <summary>
+        /// <c>_directInput</c> is a reference to an instance of a class that
+        /// implementes <c>IDirectInput</c> interface.
+        /// wrapper class.
+        /// </summary>
+        private readonly IDirectInput _directInput = directInputWrapper;
+        /// <summary>
+        /// 
+        /// </summary>
+        public DirectInputBinds Binds = new();
         /// <summary>
         /// <c>EnumerateDevices</c> uses the <c>DirectInput</c> wrapper to
         /// iterate through all of the devices that can be seen by
@@ -125,7 +136,11 @@ namespace Engine.Input
             {
                 var inputDevice = _directInput.CreateInputDevice(device);
                 if (null == inputDevice) continue;
-                _inputDevices.Add(inputDevice);
+                Devices.Add(inputDevice);
+                Messenger<NewDeviceMessage>.Trigger?.Invoke(
+                    inputDevice.DeviceGuid,
+                    inputDevice.GetDeviceType()
+                );
             }
         }
         /// <summary>
@@ -134,52 +149,68 @@ namespace Engine.Input
         /// corresponding <c>InputState</c> manager that matches each device
         /// <c>Guid</c>.
         /// </summary>
-        public void Update()
-        { 
-            foreach (var device in _inputDevices)
-            {
+        /// <returns>
+        /// An instance of InputFrame populated with the bind triggers
+        /// associated with user input.
+        /// </returns>
+        public InputFrame Update() {
+            InputFrame frame = new();
+                 
+            for (int i = 0; i < Devices.Count; ++i) {
+                var device = Devices[i];
                 var deviceType = device.GetDeviceType();
-                if (DeviceType.Mouse == deviceType)
-                {
+                if (DeviceType.Mouse == deviceType) {
                     InputDeviceMouse mouseDevice = (InputDeviceMouse)device;
                     MouseUpdate[] updates = mouseDevice.GetUpdates();
-                    foreach (var update in updates)
-                    {
-                        MouseMessage? handler = Messenger<MouseMessage>.Trigger;
-                        if (null != handler)
-                            handler(device, update);
+                    for (int j = 0; j < updates.Length; ++j) {
+                        var update = updates[j];
+                        Messenger<MouseMessage>.Trigger?.Invoke(device, update);
+                        if (Binds.IsMouseOffsetBound(update.Offset)) {
+                            IMessage message = Binds.CreateMessageFromMouse(
+                                device,
+                                update
+                            );
+                            frame.AddMessage(message);
+                        }
                     }
                 }
-                else if (DeviceType.Keyboard == deviceType)
-                {
+                else if (DeviceType.Keyboard == deviceType) {
                     InputDeviceKeyboard keyboardDevice =
                         (InputDeviceKeyboard)device;
                     KeyboardUpdate[] updates = keyboardDevice.GetUpdates();
-                    foreach (var update in updates)
-                    {
-                        KeyboardMessage? handler =
-                            Messenger<KeyboardMessage>.Trigger;
-                        if (null != handler)
-                            handler(device, update);
+                    for (int j = 0; j < updates.Length; ++j) {
+                        var update = updates[j];
+                        Messenger<KeyboardMessage>.Trigger?.Invoke(device, update);
+                        if (Binds.IsKeyboardKeyBound(update.Key)) {
+                            IMessage message = Binds.CreateMessageFromKeyboard(
+                                device,
+                                update
+                            );
+                            frame.AddMessage(message);
+                        }
                     }
-                }
-                else if (
+                } else if (
                     DeviceType.Joystick == deviceType ||
                     DeviceType.Gamepad == deviceType
-                )
-                {
+                ) {
                     InputDeviceJoystick joystickDevice =
                         (InputDeviceJoystick)device;
                     JoystickUpdate[] updates = joystickDevice.GetUpdates();
-                    foreach (var update in updates)
-                    {
-                        JoystickMessage? handler =
-                            Messenger<JoystickMessage>.Trigger;
-                        if (null != handler)
-                            handler(device, update);
+                    for (int j = 0; j < updates.Length; ++j) {
+                        var update = updates[j];
+                        Messenger<JoystickMessage>.Trigger?.Invoke(device, update);
+                        if (Binds.IsJoystickOffsetBound(update.Offset)) {
+                            IMessage message = Binds.CreateMessageFromJoystick(
+                                device,
+                                update
+                            );
+                            frame.AddMessage(message);
+                        }
                     }
                 }
             }
+
+            return frame;
         }
         /// <summary>
         /// <c>SelectSuitableDevice</c> is a method that automatically selects
@@ -197,24 +228,7 @@ namespace Engine.Input
         public InputDevice SelectSuitableDevice(DeviceType deviceType)
         {
             // TODO: Make this intellegently select a device.
-            return _inputDevices[0];
+            return Devices[0];
         }
-        /// <summary>
-        /// <c>_inputDevices</c> is a <c>List</c> of <c>InputDevice</c>
-        /// instances representing all supported and enumarated devices
-        /// connected to the system.
-        /// </summary>
-        private List<InputDevice> _inputDevices;
-        /// <summary>
-        /// <c>_directInput</c> is a reference to an instance of a class that
-        /// implementes <c>IDirectInput</c> interface.
-        /// wrapper class.
-        /// </summary>
-        private IDirectInput _directInput;
-        /// <summary>
-        /// <c>Devices</c> is a property providing public access to the
-        /// <c>_inputDevices</c> list.
-        /// </summary>
-        public List<InputDevice> Devices { get { return _inputDevices; } }
     }
 }
