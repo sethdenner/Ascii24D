@@ -45,14 +45,19 @@ namespace Engine.Native
         COMMON_LVB_REVERSE_VIDEO = 0x4000,
         COMMON_LVB_UNDERSCORE = 0x8000
     };
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct COORD {
+        public short X;
+        public short Y;
+    }
     /// <summary>
     /// <c>CHAR_INFO</c> struct holds information for rendering a single console
-    /// character including color and ohter style attributes as well as the font
+    /// character including color and other style attributes as well as the font
     /// glyph to be rendered. This struct implements the C++ Windows API struct
     /// <c>CHAR_INFO</c> and can be used to marshal objects of that type from
     /// C++ code.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct CHAR_INFO
     {
         /// <summary>
@@ -171,6 +176,10 @@ namespace Engine.Native
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="consoleWindow"></param>
+        /// <param name="numColors"></param>
+        /// <param name="paletteInfo"></param>
+        /// <returns></returns>
         [DllImport(
            "ConsoleWindows.dll",
            CallingConvention = CallingConvention.Cdecl
@@ -179,6 +188,34 @@ namespace Engine.Native
             nint consoleWindow,
             int numColors,
             PaletteInfo[] paletteInfo
+        );
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="consoleWindow"></param>
+        /// <param name="fontSize"></param>
+        /// <returns></returns>
+        [DllImport(
+            "ConsoleWindows.dll",
+            CallingConvention = CallingConvention.Cdecl
+        )]
+        public static extern int GetFontSize(
+            nint consoleWindow,
+            out COORD fontSize
+        );
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="consoleWindow"></param>
+        /// <param name="fontSize"></param>
+        /// <returns></returns>
+        [DllImport(
+            "ConsoleWindows.dll",
+            CallingConvention = CallingConvention.Cdecl
+        )]
+        public static extern int SetFontSize(
+            nint consoleWindow,
+            COORD fontSize
         );
         /// <summary>
         /// 

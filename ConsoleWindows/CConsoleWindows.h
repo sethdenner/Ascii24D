@@ -82,6 +82,12 @@ public:
 		const int numColors,
 		const PaletteInfo* paletteInfo
 	);
+	int SetFontSize(
+		const COORD fontSize
+	);
+	int GetFontSize(
+		COORD& fontSize
+	);
 	void ClearScreen(
 		const ConsolePixel clearPixel,
 		const short width,
@@ -145,6 +151,14 @@ extern "C"
 		CConsoleWindows* consoleWindow,
 		const int numColors,
 		const PaletteInfo* paletteInfo
+	);
+	CONSOLEWINDOWSDLL_API int SetFontSize(
+		CConsoleWindows* consoleWindow,
+		const COORD fontSize
+	);
+	CONSOLEWINDOWSDLL_API int GetFontSize(
+		CConsoleWindows* consoleWindow,
+		COORD& fontSize
 	);
 	CONSOLEWINDOWSDLL_API void ClearScreen(
 		CConsoleWindows* consoleWindow,

@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngineIntegrationTests", "E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngineUnitTests", "EngineUnitTests\EngineUnitTests.csproj", "{4B51ACDE-BB5E-4925-98D4-70B6F878BA67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deathmatch", "Demos\Deathmatch\Deathmatch.csproj", "{596B8445-08FB-4A8C-A9F2-DE6BD78C4D66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deathmatch", "Demos\Deathmatch\Deathmatch.csproj", "{596B8445-08FB-4A8C-A9F2-DE6BD78C4D66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

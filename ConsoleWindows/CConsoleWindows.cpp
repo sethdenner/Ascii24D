@@ -144,6 +144,8 @@ int CConsoleWindows::InitializeConsole(
 
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)OnClose, TRUE);
 
+	// ShowWindow(consoleWindowHandle, SW_MAXIMIZE);
+
 	return 1;
 }
 
@@ -355,6 +357,37 @@ int CConsoleWindows::SetScreenColorsWinApi(
 	return result;
 }
 
+int CConsoleWindows::GetFontSize(COORD& fontSize) {
+	CONSOLE_FONT_INFOEX cfi;
+	ZeroMemory(&cfi, sizeof(cfi));
+	cfi.cbSize = sizeof(cfi);
+	int result = GetCurrentConsoleFontEx(
+		_consoleHandle,
+		false,
+		&cfi
+	);
+	fontSize = {
+		cfi.dwFontSize.X,
+		cfi.dwFontSize.Y
+	};
+	return result;
+}
+
+int CConsoleWindows::SetFontSize(COORD fontSize) {
+	// Set the font size now that the screen buffer has been assigned to the
+	// console.
+	SetConsoleCP(CP_OEMCP);
+	CONSOLE_FONT_INFOEX cfi;
+	ZeroMemory(&cfi, sizeof(cfi));
+	cfi.cbSize = sizeof(cfi);
+	cfi.dwFontSize = fontSize;
+	cfi.FontFamily = 0;
+	cfi.FontWeight = FW_DONTCARE;
+	wcscpy_s(cfi.FaceName, L"Terminal");
+	if (!SetCurrentConsoleFontEx(_consoleHandle, false, &cfi))
+		return Error(L"SetCurrentConsoleFontEx");
+}
+
 void CConsoleWindows::ClearScreen(
 	const ConsolePixel clearPixel,
 	const short width,
@@ -486,6 +519,20 @@ int SetScreenColors(
 		numColors,
 		paletteInfo
 	);
+}
+
+int GetFontSize(
+	CConsoleWindows* consoleWindow,
+	COORD& fontSize
+) {
+	return consoleWindow->GetFontSize(fontSize);
+}
+
+int SetFontSize(
+	CConsoleWindows* consoleWindow,
+	const COORD fontSize
+) {
+	return consoleWindow->SetFontSize(fontSize);
 }
 
 bool HandleWindowResize(

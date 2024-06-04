@@ -101,6 +101,12 @@
                 paletteInfo
             );
         }
+        public static void GetFontSize(out COORD fontSize) {
+            _ = NativeWindows.GetFontSize(
+                _consoleWindow,
+                out fontSize
+            );
+        }
         /// <summary>
         /// <c>ClearScreen</c> is a static method that handles calling native
         /// core responsible for clearing the console window screen buffer.
