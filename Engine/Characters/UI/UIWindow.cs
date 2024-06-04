@@ -57,7 +57,7 @@ namespace Engine.Characters.UI
             ConsolePixel borderPixel
         ) : base() 
         {
-            int depth = (int)Math.Floor(position.Z);
+            int depth = (int)Math.Ceiling(position.Z);
             Width = width;
             Height = height;
             Position = position;
@@ -235,8 +235,8 @@ namespace Engine.Characters.UI
             Sprite windowSprite = new Sprite(
                 Width,
                 Height,
-                (int)Math.Floor(Position.X),
-                (int)Math.Floor(Position.Y)
+                (int)Math.Ceiling(Position.X),
+                (int)Math.Ceiling(Position.Y)
             );
             for (int i = 0; i < windowSprite.BufferPixels.Length; ++i)
             {
@@ -258,8 +258,8 @@ namespace Engine.Characters.UI
         {
             if (0 == window.Width && 0 == window.Height)
             {
-                int positionX = (int)Math.Floor(Position.X);
-                int positionY = (int)Math.Floor(Position.Y);
+                int positionX = (int)Math.Ceiling(Position.X);
+                int positionY = (int)Math.Ceiling(Position.Y);
                 window.Width = 
                     Width - positionX - (2 * BorderWidth) -
                     PaddingLeft - PaddingRight;
@@ -270,15 +270,11 @@ namespace Engine.Characters.UI
             window.Position = new Vector3(
                 window.Position.X + Position.X + BorderWidth,
                 window.Position.Y + Position.Y + BorderWidth,
-                (int)Math.Floor(Position.Z + 1)
+                Position.Z + 1
             );
 
             AddChild(window);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        public override void RegisterInputHandlers() { }
         /// <summary>
         /// 
         /// </summary>

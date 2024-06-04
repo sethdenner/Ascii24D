@@ -31,7 +31,7 @@ struct
 {
 	unsigned char ForegroundColorIndex;
 	unsigned char BackgroundColorIndex;
-	unsigned char CharacterCode;
+	wchar_t  CharacterCode;
 } typedef ConsolePixel;
 struct {
 	unsigned char Index;
@@ -109,6 +109,8 @@ private:
     CHAR_INFO* _screenBuffer;
     int _screenWidth;
     int _screenHeight;
+	int _fontWidth;
+	int _fontHeight;
 
 	static std::atomic<bool> _isAtomActive;
 	static std::mutex _gameMutex;

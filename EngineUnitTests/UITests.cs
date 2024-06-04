@@ -13,18 +13,18 @@ namespace EngineTests
         {
             int width = 10; // arbitrary.
             int height = 20; //arbitrary.
-            Vector3 position = new Vector3(
+            Vector3 position = new(
                 1, 2, 3
             );
             ConsolePixel backgroundPixel = new() {
                 ForegroundColorIndex = 0,
                 BackgroundColorIndex = 0,
-                CharacterCode = (byte)'1'
+                CharacterCode = '1'
             };
             ConsolePixel borderPixel = new() {
                 ForegroundColorIndex = 0,
                 BackgroundColorIndex = 0,
-                CharacterCode = (byte)'2'
+                CharacterCode = '2'
             };
             int borderWidth = 1;
             int paddingBottom = 2;

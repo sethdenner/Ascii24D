@@ -94,13 +94,10 @@
             WindowWidth = width;
             WindowHeight = height;
         }
-        public static void SetScreenColors(
-            int numColors,
-            PaletteInfo[] paletteInfo
-        ) {
-            NativeWindows.SetScreenColors(
+        public static void SetScreenColors(PaletteInfo[] paletteInfo) {
+            _ = NativeWindows.SetScreenColors(
                 _consoleWindow,
-                numColors,
+                paletteInfo.Length,
                 paletteInfo
             );
         }

@@ -121,8 +121,16 @@ namespace DirectInputDebugDemo {
     /// <summary>
     /// 
     /// </summary>
-    internal sealed class DemoApplicationState(Stage initialStage) :
-        ApplicationState(initialStage),
+    internal sealed class DemoApplicationState(
+        Stage initialStage,
+        int framebufferWidth,
+        int framebufferHeight
+        ) :
+        ApplicationState(
+            initialStage,
+            framebufferWidth,
+            framebufferHeight
+        ),
         IApplicationStateInput,
         IDebugInputState,
         IFrameTimeCounterState {
@@ -206,7 +214,7 @@ namespace DirectInputDebugDemo {
                     character.Text = frameTimeAvgMs.ToString() + "ms";
                     character.Width = character.Text.Length;
                     character.Position = new Vector3(
-                        state.Framebuffer.Width - character.Text.Length,
+                        state.FramebufferWidth - character.Text.Length,
                         0,
                         0
                     );
@@ -379,8 +387,8 @@ namespace DirectInputDebugDemo {
                     }
                 }
                 character.Text = string.Join("\n", [.. debugText]);
-                character.Width = state.Framebuffer.Width - 2;
-                character.Height = state.Framebuffer.Height - 2;
+                character.Width = state.FramebufferWidth - 2;
+                character.Height = state.FramebufferHeight - 2;
             }
         }
         /// <summary>
@@ -500,8 +508,8 @@ namespace DirectInputDebugDemo {
     /// </summary>
     internal class Program {
         static async Task Main(string[] args) {
-            int screenWidth = 80;
-            int screenHeight = 50;
+            int framebufferWidth = 80;
+            int framebufferHeight = 50;
             int fontWidth = 12;
             int fontHeight = 12;
             DemoScene scene = new() {
@@ -549,18 +557,18 @@ namespace DirectInputDebugDemo {
                 ],
                 Characters = [
                     new DebugInputCharacter(
-                        screenWidth - 2, // Width
-                        screenHeight - 2, // Height
+                        framebufferWidth - 2, // Width
+                        framebufferHeight - 2, // Height
                         new Vector3(1, 1, 0), // Position
                         new ConsolePixel() { // Background Pixel
                             ForegroundColorIndex = 0,
                             BackgroundColorIndex = 0,
-                            CharacterCode = (byte)' '
+                            CharacterCode = ' '
                         },
                         new ConsolePixel() { // Foreground Pixel
                             ForegroundColorIndex = 1,
                             BackgroundColorIndex = 0,
-                            CharacterCode = (byte)'#'
+                            CharacterCode = '#'
                         },
                         2, // textForegroundColor
                         0 // textBackgroundColor
@@ -570,11 +578,11 @@ namespace DirectInputDebugDemo {
                     new FpsCounterCharacter(
                        3,
                        1,
-                       new Vector3(screenWidth - 3, 0, 0),
+                       new Vector3(framebufferWidth - 3, 0, 0),
                        new ConsolePixel() { // Background Pixel
                            ForegroundColorIndex = 0,
                            BackgroundColorIndex = 0,
-                           CharacterCode = (byte)' '
+                           CharacterCode = ' '
                        },
                        new ConsolePixel() { },
                        2, // textForegroundColor
@@ -588,14 +596,20 @@ namespace DirectInputDebugDemo {
                     new SimulationDirectInput(),
                     new FrameTimeCounterSimulation(),
                     new SimulationConsoleRender(
-                        screenWidth,
-                        screenHeight,
+                        framebufferWidth,
+                        framebufferHeight,
                         fontWidth,
-                        fontHeight
+                        fontHeight,
+                        new ConsolePixel() {
+                        }
                     )
                 ]
             };
-            DemoApplicationState state = new(stage);
+            DemoApplicationState state = new(
+                stage,
+                framebufferWidth,
+                framebufferHeight
+            );
             stage.AddScene(scene);
             long tick = 166666;
             long step = tick;

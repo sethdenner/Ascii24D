@@ -91,11 +91,11 @@ namespace Engine.Characters.UI
             new Native.ConsolePixel() {
                 ForegroundColorIndex = 0,
                 BackgroundColorIndex = 0,
-                CharacterCode = (byte)' '
+                CharacterCode = ' '
             }, new Native.ConsolePixel() {
                 ForegroundColorIndex = 0,
                 BackgroundColorIndex = 3,
-                CharacterCode = (byte)'#'
+                CharacterCode = '#'
             },
             2,
             0

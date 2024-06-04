@@ -45,7 +45,7 @@ namespace Engine.Characters
         {
             // Convert the counter to a string.
             string countString = _count.ToString();
-            // Intitialize a sprite with the proper dimensions.
+            // Initialize a sprite with the proper dimensions.
             Sprite sprite = new Sprite(countString.Length, 1);
             // Iterate over the counter string.
             for (int i = 0; i < countString.Length; ++i)
@@ -53,7 +53,7 @@ namespace Engine.Characters
                 sprite.SetPixel(i, new ConsolePixel {
                     ForegroundColorIndex = ForegroundColorIndex,
                     BackgroundColorIndex = BackgroundColorIndex,
-                    CharacterCode = (byte)countString[i]
+                    CharacterCode = countString[i]
                 });
             }
             // Clear any previous sprites.
@@ -61,9 +61,6 @@ namespace Engine.Characters
             // Add the newly generated sprite.
             Sprites.Add(sprite);
         }
-
-        public override void RegisterInputHandlers() { }
-
         /// <summary>
         /// 
         /// </summary>

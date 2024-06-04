@@ -1,5 +1,6 @@
 ﻿using Engine.Native;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Engine.Render
 {
@@ -61,27 +62,54 @@ namespace Engine.Render
         /// </param>
         /// <returns><c>this</c></returns>
         public Sprite MergeSprite(Sprite sprite) {
-            int renderHeight = Math.Min(
-                Height - sprite.OffsetY,
+            int destTop = Math.Clamp(sprite.OffsetY, 0, Height);
+            int destLeft = Math.Clamp(sprite.OffsetX, 0, Width);
+            int destBottom = Math.Clamp(
+                sprite.OffsetY + sprite.Height,
+                0,
+                Height
+            );
+           
+            int destRight = Math.Clamp(
+                sprite.OffsetX + sprite.Width,
+                0,
+                Width
+            );
+            int srcTop = Math.Clamp(
+                Height - (sprite.OffsetY + Height),
+                0,
                 sprite.Height
             );
-            for (int y = 0; y < renderHeight; ++y) {
-                int clampedWidth = sprite.Width;
-                if (clampedWidth > Width - sprite.OffsetX) {
-                    clampedWidth = Width - sprite.OffsetX;
-                }
-                
-                if (0 >= clampedWidth) {
-                    break;
-                }
-                int rhsStart = y * sprite.Width;
-                int lhsStart =
-                    (y + sprite.OffsetY) *
-                    Width + sprite.OffsetX;
-                int rhsEnd = rhsStart + clampedWidth;
-                int lhsEnd = lhsStart + clampedWidth;
-                sprite.BufferPixels.AsSpan()[rhsStart..rhsEnd].CopyTo(
-                    BufferPixels.AsSpan()[lhsStart..lhsEnd]
+            int srcLeft = Math.Clamp(
+                Width -  (sprite.OffsetX + Width),
+                0,
+                sprite.Width
+            );
+            int srcBottom = Math.Clamp(
+                Math.Abs(sprite.OffsetY - Height),
+                0,
+                sprite.Height
+            );
+            int srcRight = Math.Clamp(
+                Math.Abs(sprite.OffsetX - Width),
+                0,
+                sprite.Width
+            );
+            int height = Math.Min(
+                Math.Abs(destBottom - destTop),
+                Math.Abs(srcBottom - srcTop)
+            );
+            int width = Math.Min(
+                Math.Abs(destRight - destLeft),
+                Math.Abs(srcRight - srcLeft)
+            );
+            for (int y = 0; y < height; ++y) {
+                int destStart = destLeft + ((y + destTop) * Width);
+                int srcStart = srcLeft + ((y + srcTop) * sprite.Width);
+                int destEnd = destStart + width;
+                int srcEnd = srcStart + width;
+                sprite.BufferPixels.AsSpan()[srcStart..srcEnd].CopyTo(
+                    BufferPixels.AsSpan()[destStart..destEnd]
                 );
             }
             return this;
@@ -90,7 +118,7 @@ namespace Engine.Render
         /// An array of <c>Pixel</c> instances representing the sprite.
         /// </summary>
         public ConsolePixel[] BufferPixels {
-            get;
+            get; set;
         }
         /// <summary>
         /// The total width of the sprite.

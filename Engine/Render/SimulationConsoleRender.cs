@@ -6,7 +6,8 @@ namespace Engine.Render {
         int width,
         int height,
         int fontWidth,
-        int fontHeight
+        int fontHeight,
+        ConsolePixel fillPixel
     ) : ISimulation {
         public int Width {
             get; set;
@@ -20,9 +21,14 @@ namespace Engine.Render {
         public int FontHeight {
             get; set;
         } = fontHeight;
+        public ConsolePixel FillPixel {
+            get; set;
+        } = fillPixel;
+        public Sprite Framebuffer {
+            get; set;
+        } = new(width, height);
 
-        public void Cleanup(IApplicationState state) {
-        }
+        public void Cleanup(IApplicationState state) { }
 
         public void Setup(IApplicationState state) {
             Native.Native.CreateConsoleWindow();
@@ -33,13 +39,10 @@ namespace Engine.Render {
                 FontHeight
             );
             Console.Clear();
-            Native.Native.SetScreenColors(
-                5,
-                state.CurrentScene.Palette
-            );
-            state.Framebuffer = CreateFramebuffer(
-               Native.Native.WindowWidth,
-               Native.Native.WindowHeight,
+            Native.Native.SetScreenColors(state.CurrentScene.Palette);
+            Framebuffer = CreateFramebuffer(
+               Framebuffer.Width,
+               Framebuffer.Height,
                0,
                0
            );
@@ -56,30 +59,32 @@ namespace Engine.Render {
             if (
                 Native.Native.HandleWindowResize(out SMALL_RECT newWindowSize)
             ) {
-                state.Framebuffer = ResizeWindow(newWindowSize);
+                Framebuffer = ResizeWindow(newWindowSize);
+                state.FramebufferHeight = Framebuffer.Height;
+                state.FramebufferWidth = Framebuffer.Width;
             }
             try {
-                state.Framebuffer.Fill(new ConsolePixel() {
-                    ForegroundColorIndex = 2,
-                    BackgroundColorIndex = 2,
-                    CharacterCode = (byte)' '
-                });
+                Framebuffer.Fill(FillPixel);
             } catch (System.IndexOutOfRangeException) {
                 Native.Native.HandleWindowResize(out newWindowSize);
-                state.Framebuffer = ResizeWindow(newWindowSize);
+                Framebuffer = ResizeWindow(newWindowSize);
+                state.FramebufferHeight = Framebuffer.Height;
+                state.FramebufferWidth = Framebuffer.Width;
             }
-            state.CurrentScene.Render(state.Framebuffer);
+            state.CurrentScene.Render(Framebuffer, state.ViewMatrix);
             try {
                 Native.Native.CopyBufferToScreen(
-                    state.Framebuffer.BufferPixels,
-                    state.Framebuffer.Width,
-                    state.Framebuffer.Height,
+                    Framebuffer.BufferPixels,
+                    Framebuffer.Width,
+                    Framebuffer.Height,
                     0,
                     0
                 );
             } catch (System.IndexOutOfRangeException) {
                 Native.Native.HandleWindowResize(out newWindowSize);
-                state.Framebuffer = ResizeWindow(newWindowSize);
+                Framebuffer = ResizeWindow(newWindowSize);
+                state.FramebufferHeight = Framebuffer.Height;
+                state.FramebufferWidth = Framebuffer.Width;
             }
         }
 
@@ -116,19 +121,22 @@ namespace Engine.Render {
         /// </summary>
         /// <param name="newWindowSize"></param>
         /// <returns></returns>
-        public static Sprite ResizeWindow(SMALL_RECT newWindowSize) {
+        public Sprite ResizeWindow(SMALL_RECT newWindowSize) {
+            if (newWindowSize.Right < 1) { newWindowSize.Right = 1; }
+            if (newWindowSize.Bottom < 1) { newWindowSize.Bottom = 1; }
+
             Native.Native.InitalizeSurface(
                newWindowSize.Right - newWindowSize.Left,
                newWindowSize.Bottom - newWindowSize.Top,
-               12,
-               12
-           );
+               FontWidth,
+               FontHeight
+            );
             return CreateFramebuffer(
                newWindowSize.Right - newWindowSize.Left,
                newWindowSize.Bottom - newWindowSize.Top,
                newWindowSize.Left,
                newWindowSize.Top
-           );
+            );
         }
     }
 }

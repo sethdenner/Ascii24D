@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Engine.Core {
@@ -200,9 +201,9 @@ namespace Engine.Core {
             }
         }
         /// <summary>
-        /// Updates all simulations. First asyncronous simulation tasks are
+        /// Updates all simulations. First asynchronous simulation tasks are
         /// started and then the rest of the simulations are updated
-        /// syncronously.
+        /// synchronously.
         /// </summary>
         /// <param name="step">
         /// The time step to advance the simulation in ticks. Ticks are 100s of
@@ -211,7 +212,7 @@ namespace Engine.Core {
         /// <param name="headless">
         /// If true indicates that the simulation will not be intended to be
         /// displayed so the step can be optimized by excluding any elements of
-        /// the simulation that are uncessary for determining the state of
+        /// the simulation that are unnecessary for determining the state of
         /// future steps.
         /// </param>
         public async Task UpdateSimulations(long step, bool headless=false) {

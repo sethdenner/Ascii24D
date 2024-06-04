@@ -64,14 +64,6 @@ namespace Engine.Characters
             }
         }
         /// <summary>
-        /// <c>RegisterInputHandlers</c> registers the HandleMouseMessage
-        /// callback to <c>MouseMessage</c>
-        /// </summary>
-        public override void RegisterInputHandlers()
-        {
-            Messenger<MouseMessage>.Register(HandleMouseMessage);
-        }
-        /// <summary>
         /// <c>CenterMousePosition</c> sets <c>MousePosition</c> to the center
         /// of the screen according to the current <c>ScreenDimensions</c>.
         /// </summary>

@@ -70,23 +70,20 @@ namespace Engine.Characters
             Sprite sprite = new(
                 FpsString.Length,
                 1,
-                (int)Math.Floor(Position.X),
-                (int)Math.Floor(Position.Y)
+                (int)Math.Ceiling(Position.X),
+                (int)Math.Ceiling(Position.Y)
             );
             for (int i = 0; i < FpsString.Length; ++i)
             {
                 sprite.BufferPixels[i] = new ConsolePixel {
                     ForegroundColorIndex = ForegroundColorIndex,
                     BackgroundColorIndex = BackgroundColorIndex,
-                    CharacterCode = (byte)FpsString[i]
+                    CharacterCode = FpsString[i]
                 };
             }
             Sprites.Clear();
             Sprites.Add(sprite);
         }
-
-        public override void RegisterInputHandlers() { }
-
         /// <summary>
         /// 
         /// </summary>

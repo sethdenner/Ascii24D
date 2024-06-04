@@ -1,4 +1,5 @@
 ﻿using Engine.Render;
+using System.Numerics;
 
 namespace Engine.Core {
     /// <summary>
@@ -8,7 +9,13 @@ namespace Engine.Core {
         public long FrameCount {
             get; set;
         }
-        public Sprite Framebuffer {
+        public int FramebufferWidth {
+            get; set;
+        }
+        public int FramebufferHeight {
+            get; set;
+        }
+        public Matrix4x4 ViewMatrix {
             get; set;
         }
         public List<Stage> LoadedStages {

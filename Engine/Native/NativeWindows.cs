@@ -94,7 +94,7 @@ namespace Engine.Native
     {
         public byte ForegroundColorIndex;
         public byte BackgroundColorIndex;
-        public byte CharacterCode;
+        public ushort CharacterCode;
     }
     /// <summary>
     /// 

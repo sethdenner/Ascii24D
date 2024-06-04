@@ -21,14 +21,17 @@ namespace Engine.Characters {
         }
         /// <summary>
         /// The <c>Render</c> method compiles all of the elements
-        /// returned by the <c>Sprites</c> property. 
+        /// returned by the <c>Sprites</c> property and transforms them with the
+        /// injected translate vector.
         /// </summary>
-        /// <returns>
-        /// Retuns an instance of <c>Sprite</c> representing the
-        /// final compiled sprite.
-        /// </returns>
-        public void Render(Sprite renderTarget);
-        public void RegisterInputHandlers();
+        /// <param name="renderTarget">
+        /// A <c>Sprite</c> representing a canvas to draw other sprites to.
+        /// </param>
+        /// <param name="worldCameraViewport">
+        /// A <c>Matrix4x4</c> representing the combined Model -> World,
+        /// World -> Camera and Camera -> Viewport matrices.
+        /// </param>
+        public void Render(Sprite renderTarget, Matrix4x4 worldCameraViewport);
         public void GenerateSprites();
     }
 }

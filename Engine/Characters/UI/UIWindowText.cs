@@ -50,8 +50,8 @@ namespace Engine.Characters.UI
         public override void GenerateSprites()
         {
             base.GenerateSprites();
-            int positionX = (int)Math.Floor(Position.X);
-            int positionY = (int)Math.Floor(Position.Y);
+            int positionX = (int)Math.Ceiling(Position.X);
+            int positionY = (int)Math.Ceiling(Position.Y);
             int width = Width - PaddingRight - PaddingLeft - (2 * BorderWidth);
             int height = Height - PaddingTop - PaddingBottom - (2 * BorderWidth);
             if (width <= 0 || height <=0) {
@@ -92,20 +92,12 @@ namespace Engine.Characters.UI
                     new ConsolePixel() {
                         ForegroundColorIndex = ForegroundColorIndex,
                         BackgroundColorIndex = BackgroundColorIndex,
-                        CharacterCode = (byte)Text[i]
+                        CharacterCode = Text[i]
                     }
                 );
             }
 
             Sprites.Add(textSprite);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public override void Render(Sprite renderTarget)
-        {
-            base.Render(renderTarget);
         }
     }
 }

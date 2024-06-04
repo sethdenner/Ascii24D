@@ -1,15 +1,26 @@
 ﻿using Engine.Characters;
 using Engine.Render;
+using System.Numerics;
 
 namespace Engine.Core {
     [Serializable]
-    public abstract class ApplicationState(Stage initialStage) : IApplicationState {
+    public abstract class ApplicationState(
+        Stage initialStage,
+        int framebufferWidth,
+        int framebufferHeight
+    ) : IApplicationState {
         public long FrameCount {
             get; set;
         } = 0;
-        public Sprite Framebuffer {
+        public int FramebufferWidth {
             get; set;
-        } = new();
+        } = framebufferWidth;
+        public int FramebufferHeight {
+            get; set;
+        } = framebufferHeight;
+        public Matrix4x4 ViewMatrix {
+            get; set;
+        }
         public List<Stage> LoadedStages {
             get; set;
         } = [];

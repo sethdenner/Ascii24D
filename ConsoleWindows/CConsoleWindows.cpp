@@ -20,6 +20,13 @@ CConsoleWindows::CConsoleWindows()
 
 	_consoleWindow = GetConsoleWindow();
 
+	_screenWidth = 0;
+	_screenHeight = 0;
+	_fontWidth = 0;
+	_fontHeight = 0;
+	_originalConsole = NULL;
+	_rectWindow = {};
+	_screenBuffer = NULL;
 }
 
 int CConsoleWindows::InitializeConsole(
@@ -36,19 +43,20 @@ int CConsoleWindows::InitializeConsole(
 		NULL
 	);
 	SetConsoleActiveScreenBuffer(_consoleHandle);
-	SetConsoleCP(CP_UTF8);
-
 	if (_consoleHandle == INVALID_HANDLE_VALUE)
 		return Error(L"Bad Handle");
 
+
 	_screenWidth = width;
 	_screenHeight = height;
+	_fontWidth = fontWidth;
+	_fontHeight = fontHeight;
 
 	// Update 13/09/2017 - It seems that the console behaves differently on some
 	// systems and I'm unsure why this is. It could be to do with windows
 	// default settings, or screen resolutions, or system languages.
 	// Unfortunately, MSDN does not offer much by way of useful information,
-	// and so the resulting sequence is the reult of experiment that seems to
+	// and so the resulting sequence is the result of experiment that seems to
 	// work in multiple cases.
 	//
 	// The problem seems to be that the SetConsoleXXX functions are somewhat
@@ -64,31 +72,16 @@ int CConsoleWindows::InitializeConsole(
 	SetConsoleWindowInfo(_consoleHandle, TRUE, &_rectWindow);
 
 	// Set the size of the screen buffer
-	COORD coord = { (short)_screenWidth, (short)_screenHeight };
-	if (!SetConsoleScreenBufferSize(_consoleHandle, coord))
+	COORD screenSize = { (short)_screenWidth, (short)_screenHeight };
+	if (!SetConsoleScreenBufferSize(_consoleHandle, screenSize))
 		Error(L"SetConsoleScreenBufferSize");
 
 	// Assign screen buffer to the console
 	if (!SetConsoleActiveScreenBuffer(_consoleHandle))
 		return Error(L"SetConsoleActiveScreenBuffer");
 
-	// Set the font size now that the screen buffer has been assigned to the
-	// console.
-	CONSOLE_FONT_INFOEX cfi;
-	cfi.cbSize = sizeof(cfi);
-	cfi.nFont = 0;
-	cfi.dwFontSize.X = fontWidth;
-	cfi.dwFontSize.Y = fontHeight;
-	cfi.FontFamily = FF_DONTCARE;
-	cfi.FontWeight = FW_NORMAL;
-
-	// Using Perfect DOS Code 437 font. TODO: Make this configurable.
-	wcscpy_s(cfi.FaceName, L"Perfect DOS VGA 437");
-	if (!SetCurrentConsoleFontEx(_consoleHandle, false, &cfi))
-		return Error(L"SetCurrentConsoleFontEx");
-
 	// Get screen buffer info and check the maximum allowed window size. Return
-	// error if exceeded, so user knows their dimensions/fontsize are too large
+	// error if exceeded, so user knows their dimensions/font size are too large
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(_consoleHandle, &csbi))
 		return Error(L"GetConsoleScreenBufferInfo");
@@ -109,11 +102,28 @@ int CConsoleWindows::InitializeConsole(
 	cursorInfo.dwSize = 1;
 	SetConsoleCursorInfo(_consoleHandle, &cursorInfo);
 
+	SetConsoleCP(CP_OEMCP);
+	// Set the font size now that the screen buffer has been assigned to the
+	// console.
+	CONSOLE_FONT_INFOEX cfi;
+	ZeroMemory(&cfi, sizeof(cfi));
+	cfi.cbSize = sizeof(cfi);
+	cfi.dwFontSize.X = _fontWidth;
+	cfi.dwFontSize.Y = _fontHeight;
+	cfi.FontFamily = 0;
+	cfi.FontWeight = FW_DONTCARE;
+
+	wcscpy_s(cfi.FaceName, L"Terminal");
+	if (!SetCurrentConsoleFontEx(_consoleHandle, false, &cfi))
+		return Error(L"SetCurrentConsoleFontEx");
+
+
+	HWND consoleWindowHandle = GetConsoleWindow();
 	// Hide scroll bars.
-	ShowScrollBar(GetConsoleWindow(), SB_BOTH, FALSE);
+	ShowScrollBar(consoleWindowHandle, SB_BOTH, FALSE);
 
 	// Set window fully opaque.
-	SetLayeredWindowAttributes(GetConsoleWindow(), NULL, 255, LWA_ALPHA);
+	SetLayeredWindowAttributes(consoleWindowHandle, NULL, 255, LWA_ALPHA);
 
 	// Set flags to allow mouse input		
 	if (!SetConsoleMode(
@@ -122,6 +132,7 @@ int CConsoleWindows::InitializeConsole(
 		ENABLE_WINDOW_INPUT |
 		ENABLE_MOUSE_INPUT
 	)) return Error(L"SetConsoleMode");
+
 
 	// Allocate memory for screen buffer
 	if (NULL != _screenBuffer)
@@ -134,6 +145,15 @@ int CConsoleWindows::InitializeConsole(
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)OnClose, TRUE);
 
 	return 1;
+}
+
+static int CALLBACK EnumFontFamExProc(
+	const LOGFONT* lpelfe,
+	const TEXTMETRIC* lpntme,
+	DWORD      FontType,
+	LPARAM     lParam
+) {
+	return 0;
 }
 
 int CConsoleWindows::Error(const wchar_t* msg)
@@ -377,8 +397,8 @@ bool CConsoleWindows::HandleWindowResize(SMALL_RECT &newWindowSize)
 		InitializeConsole(
 			screenBufferInfo.srWindow.Right - screenBufferInfo.srWindow.Left,
 			screenBufferInfo.srWindow.Bottom - screenBufferInfo.srWindow.Top,
-			12,
-			12
+			_fontWidth,
+			_fontHeight
 		);
 
 		newWindowSize = {};

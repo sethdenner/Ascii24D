@@ -1,6 +1,7 @@
 ﻿using Engine.Characters;
 using Engine.Native;
 using Engine.Render;
+using System.Numerics;
 
 namespace Engine.Core {
     public class Scene {
@@ -28,9 +29,15 @@ namespace Engine.Core {
         /// <param name="framebuffer">
         /// A <c>Sprite</c> reference to render the scene to.
         /// </param>
-        public virtual void Render(Sprite framebuffer) {
+        public virtual void Render(Sprite framebuffer, Matrix4x4 camera) {
+            var viewport = Matrix4x4.CreateViewport(
+                0, 0, framebuffer.Width, framebuffer.Height,
+                -1, 1
+            );
             for (int i = 0; i < Characters.Count; ++i) {
-                Characters[i].Render(framebuffer);
+                var character = Characters[i];
+                var world = Matrix4x4.CreateTranslation(character.Position);
+                character.Render(framebuffer, viewport * camera * world);
             }
         }
     }
