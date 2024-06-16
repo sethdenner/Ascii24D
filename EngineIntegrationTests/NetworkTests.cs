@@ -33,7 +33,7 @@ namespace EngineIntegrationTests {
         /// Test sending and receiving packets over the local area network.
         /// </summary>
         [Fact]
-        public async void TestP2PClientTestSendAndReceivePacket() {
+        public async Task TestP2PClientTestSendAndReceivePacket() {
             var socket0 = new SocketUdp();
             var socket1 = new SocketUdp();
             var serverSocket = new SocketUdp();
