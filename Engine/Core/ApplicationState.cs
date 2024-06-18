@@ -20,7 +20,7 @@ namespace Engine.Core {
         } = framebufferHeight;
         public Matrix4x4 ViewMatrix {
             get; set;
-        }
+        } = Matrix4x4.Identity;
         public List<Stage> LoadedStages {
             get; set;
         } = [];

@@ -23,8 +23,8 @@ public struct ComponentArray<T>(int capacity) {
     public readonly void SetComponentByEntityID(int entityID, T component) {
         Array[IndexByEntityID[entityID]] = component;
     }
-    public readonly T GetComponentByEntityId(int entityID) {
-        return Array[IndexByEntityID[entityID]];
+    public readonly ref T GetComponentByEntityId(int entityID) {
+        return ref Array[IndexByEntityID[entityID]];
     }
     public void Add(int entityId, T component) {
         IndexByEntityID.Add(entityId, ComponentCount);

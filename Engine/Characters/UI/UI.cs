@@ -10,6 +10,8 @@
         /// <summary>
         /// <c>UI</c> default constructor.
         /// </summary>
-        public UI() : base() { }
+        public UI() : base() {
+            UseTransform = false;
+        }
     }
 }

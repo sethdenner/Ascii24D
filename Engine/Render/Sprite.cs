@@ -139,7 +139,7 @@ namespace Engine.Render
             get; set;
         }
         /// <summary>
-        /// The offset in the y-axis the sprite should be renderd.
+        /// The offset in the y-axis the sprite should be rendered.
         /// </summary>
         public int OffsetY {
             get; set;

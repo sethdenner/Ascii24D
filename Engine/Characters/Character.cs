@@ -27,6 +27,9 @@ namespace Engine.Characters
         /// <c>Sprites</c> is a property that publicly exposes the
         /// <c>Sprites</c> <c>List</c>.
         /// </summary>
+        public bool UseTransform {
+            get; set;
+        } = true;
         public List<Sprite> Sprites { get; set; } = [];
         /// <summary>
         /// The <c>Render</c> method compiles all of the elements
@@ -61,17 +64,22 @@ namespace Engine.Characters
                     Sprites[i].OffsetY,
                     0
                 );
-                Vector3 screenPosition = Vector3.Transform(
-                    modelPosition,
-                    worldCameraViewport
-                );
+
+
+                Vector3 screenPosition;
+                if (UseTransform) {
+                    screenPosition = Vector3.Transform(
+                        modelPosition,
+                        worldCameraViewport
+                    );
+                } else {
+                    screenPosition = modelPosition;
+                }
                 Sprite sprite = new(
                     Sprites[i].Width,
                     Sprites[i].Height,
-                    (int)Math.Ceiling(screenPosition.X) +
-                    Sprites[i].OffsetX,
-                    (int)Math.Ceiling(screenPosition.Y) +
-                    Sprites[i].OffsetY
+                    (int)Math.Ceiling(screenPosition.X),
+                    (int)Math.Ceiling(screenPosition.Y)
                 );
                 Sprites[i].BufferPixels.AsSpan().CopyTo(
                     sprite.BufferPixels.AsSpan()

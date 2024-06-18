@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace Engine.Native
 {
@@ -95,11 +96,14 @@ namespace Engine.Native
     /// 
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct ConsolePixel
-    {
-        public byte ForegroundColorIndex;
-        public byte BackgroundColorIndex;
-        public ushort CharacterCode;
+    public struct ConsolePixel(
+        byte foregroundColorIndex,
+        byte backgroundColorIndex,
+        ushort characterCode
+    ) {
+        public byte ForegroundColorIndex = foregroundColorIndex;
+        public byte BackgroundColorIndex = backgroundColorIndex;
+        public ushort CharacterCode = characterCode;
     }
     /// <summary>
     /// 

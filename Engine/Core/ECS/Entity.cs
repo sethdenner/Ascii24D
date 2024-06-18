@@ -16,9 +16,9 @@
             array.Add(EntityID, component);
         }
 
-        public T GetComponent<T>(int capacity = _default_capacity) {
+        public ref T GetComponent<T>(int capacity = _default_capacity) {
             ComponentArray<T> array = ArrayManager.GetArray<T>(capacity);
-            return array.GetComponentByEntityId(EntityID);
+            return ref array.GetComponentByEntityId(EntityID);
         }
 
         public void SetComponent<T>(T component) {
