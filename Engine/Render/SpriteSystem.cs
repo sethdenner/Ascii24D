@@ -2,7 +2,6 @@
 using Engine.Core.ECS;
 using Engine.Native;
 using System.Numerics;
-using System.Xml.Xsl;
 
 namespace Engine.Render {
     public class SpriteSystem(
@@ -42,6 +41,10 @@ namespace Engine.Render {
             } else {
                 screenPosition = component.ModelPosition;
             }
+            Vector2 texturePosition = new(
+                screenPosition.X,
+                screenPosition.Y
+            );
             Sprite sprite = new(
                 component.Width,
                 component.Height,
@@ -58,7 +61,7 @@ namespace Engine.Render {
                 component.BufferPixels,
                 component.Width,
                 component.Height,
-                screenPosition
+                texturePosition
             );
         }
 

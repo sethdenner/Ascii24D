@@ -107,9 +107,9 @@ namespace Engine.Characters.UI
             _keyboardStates = [];
             _mouseStates = [];
 
-            Messenger<JoystickMessage>.Register(HandleJoystickMessage);
-            Messenger<KeyboardMessage>.Register(HandleKeyboardMessage);
-            Messenger<MouseMessage>.Register(HandleMouseMessage);
+            JoystickMessage.Register(HandleJoystickMessage);
+            KeyboardMessage.Register(HandleKeyboardMessage);
+            MouseMessage.Register(HandleMouseMessage);
         }
         /// <summary>
         /// Update method. Populates the window text with details about the current state

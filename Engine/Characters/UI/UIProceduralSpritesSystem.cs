@@ -96,6 +96,22 @@ namespace Engine.Characters.UI {
                 );
             }
 
+            Render.Helper.Methods.BlendTextures(
+                windowSprite,
+                component.Width,
+                component.Height,
+                textSprite,
+                width,
+                height,
+                new(offsetX, offsetY)
+            );
+
+            MessageOutbox.Add(new UpdateSpritePixelsMessage(
+                component.SpriteEntityID,
+                component.Width,
+                component.Height,
+                windowSprite
+            ));
         }
         public bool IsPixelAtIndexBorder(
             int i,

@@ -1,7 +1,8 @@
 ﻿using Engine.Core;
 using SharpDX.DirectInput;
 
-namespace Engine.Input {
+namespace Engine.Input
+{
     public class SimulationDirectInput : Simulation {
         /// <summary>
         /// 
@@ -18,18 +19,18 @@ namespace Engine.Input {
         /// <summary>
         /// 
         /// </summary>
-        public InputFrame[] BufferedInputFrames = [
+        public MessageFrame[] BufferedInputFrames = [
             new(),
             new()
         ];
         /// <summary>
         /// 
         /// </summary>
-        public InputFrame ReadInputFrame;
+        public MessageFrame ReadInputFrame;
         /// <summary>
         /// 
         /// </summary>
-        public InputFrame WriteInputFrame;
+        public MessageFrame WriteInputFrame;
         public SimulationDirectInput() {
             DirectInput = new();
             SharpDXDirectInputWrapper = new(DirectInput);
@@ -51,19 +52,6 @@ namespace Engine.Input {
 
         public override Task SimulateAsync(IApplicationState state, long step, bool headless = false) {
             throw new NotImplementedException();
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public void SwapInputFrames() {
-            lock (ReadInputFrame) {
-                lock (WriteInputFrame) {
-                    (WriteInputFrame, ReadInputFrame) = (
-                        ReadInputFrame,
-                        WriteInputFrame
-                    );
-                }
-            }
         }
     }
 }

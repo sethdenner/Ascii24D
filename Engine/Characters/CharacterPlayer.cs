@@ -41,19 +41,19 @@ namespace Engine.Characters
         /// </summary>
         public virtual void RegisterMessageHandlers()
         {
-            Messenger<KeyboardMessage>.Register(
+            Message.Register(
                 HandleKeyboardMessage
             );
-            Messenger<JoystickMessage>.Register(
+            Message.Register(
                 HandleJoystickMessage
             );
-            Messenger<MouseMessage>.Register(
+            Message.Register(
                 HandleMouseMessage
             );
-            Messenger<NewDeviceMessage>.Register(
+            Message.Register(
                 HandleNewDeviceMessage
             );
-            Messenger<LostDeviceMessage>.Register(
+            Message.Register(
                 HandleLostDeviceMessage
             );
         }
@@ -73,7 +73,7 @@ namespace Engine.Characters
             DeviceType deviceType
         ) { }
         /// <summary>
-        /// <c>HandleNewDeviceMessage</c> handles <c>NewDeviceMessage</c>
+        /// <c>HandleNewDeviceMessage</c> handles <c>FoundDeviceMessage</c>
         /// delegate calls.
         /// </summary>
         /// <param name="deviceGuid">

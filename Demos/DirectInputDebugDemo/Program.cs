@@ -8,7 +8,8 @@ using System.Numerics;
 using Engine.Characters;
 using System.Runtime.InteropServices;
 
-namespace DirectInputDebugDemo {
+namespace DirectInputDebugDemo
+{
     /// <summary>
     /// <c>JoystickState</c> is a struct that represents a row
     /// of joystick state data to be rendered in the debug window.
@@ -152,7 +153,7 @@ namespace DirectInputDebugDemo {
         public List<long> FrameTimeCounterFrameTimes {
             get; set;
         } = [];
-        public InputFrame InputFrame {
+        public MessageFrame InputFrame {
             get => throw new NotImplementedException();
             set => throw new NotImplementedException();
         }
@@ -246,53 +247,65 @@ namespace DirectInputDebugDemo {
             if (state is not DemoApplicationState appState) {
                 return;
             }
-            Messenger<NewDeviceMessage>.Register((guid, type) => {
-                appState.InputDevices.Add((guid, type));
-            });
-            Messenger<KeyboardMessage>.Register((device, update) => {
-                if (!appState.KeyboardStates.ContainsKey(device.DeviceGuid)) {
-                    appState.KeyboardStates.Add(
-                        device.DeviceGuid,
-                        new KeyboardState[(int)Key.MediaSelect + 1]
-                    );
+            Message.Register<FoundDeviceMessage.FoundDeviceMessageDelegate>(
+                (guid, type) => {
+                   appState.InputDevices.Add((guid, type));
                 }
-                appState.KeyboardStates[
-                    device.DeviceGuid
-                ][(int)update.Key] = new() {
-                    IsPressed = update.IsPressed,
-                    Key = update.Key,
-                    Sequence = update.Sequence,
-                    Timestamp = update.Timestamp,
-                    Value = update.Value
-                };
-            });
-            Messenger<MouseMessage>.Register((device, update) => {
-                if (!appState.MouseStates.ContainsKey(device.DeviceGuid)) {
-                    appState.MouseStates.Add(
-                        device.DeviceGuid,
-                        new MouseState[(int)MouseOffset.Buttons7 + 1]
-                    );
+            );
+            Message.Register<KeyboardMessage.KeyboardMessageDelegate>(
+                (device, update) => {
+                    if (!appState.KeyboardStates.ContainsKey(device.DeviceGuid)) {
+                        appState.KeyboardStates.Add(
+                            device.DeviceGuid,
+                            new KeyboardState[(int)Key.MediaSelect + 1]
+                        );
+                    }
+                    appState.KeyboardStates[
+                        device.DeviceGuid
+                    ][(int)update.Key] = new() {
+                        IsPressed = update.IsPressed,
+                        Key = update.Key,
+                        Sequence = update.Sequence,
+                        Timestamp = update.Timestamp,
+                        Value = update.Value
+                    };
                 }
-                appState.MouseStates[
-                    device.DeviceGuid
-                ][(int)update.Offset] = new() {
-                    Offset = update.Offset,
-                    Sequence = update.Sequence,
-                    Timestamp = update.Timestamp,
-                    Value = update.Value,
-                    IsButton = update.IsButton
-                };
-            });
-            Messenger<JoystickMessage>.Register((device, update) => {
-                if (!appState.JoystickStates.ContainsKey(device.DeviceGuid)) {
+            );
+            Message.Register<MouseMessage.MouseMessageDelegate>(
+                (device, update) => {
+                    if (!appState.MouseStates.ContainsKey(device.DeviceGuid)) {
+                        appState.MouseStates.Add(
+                            device.DeviceGuid,
+                            new MouseState[(int)MouseOffset.Buttons7 + 1]
+                        );
+                    }
+                    appState.MouseStates[
+                        device.DeviceGuid
+                    ][(int)update.Offset] = new() {
+                        Offset = update.Offset,
+                        Sequence = update.Sequence,
+                        Timestamp = update.Timestamp,
+                        Value = update.Value,
+                        IsButton = update.IsButton
+                    };
+                }
+            );
+            Message.Register<JoystickMessage.JoystickMessageDelegate>(
+                (device, update) => {
+                if (!appState.JoystickStates.TryGetValue(
+                    device.DeviceGuid,
+                    out JoystickState[]? value
+                )) {
+                    value = new JoystickState[
+                        (int)JoystickOffset.ForceSliders1 + 1
+                    ];
                     appState.JoystickStates.Add(
                         device.DeviceGuid,
-                        new JoystickState[(int)JoystickOffset.ForceSliders1 + 1]
+                        value
                     );
                 }
-                appState.JoystickStates[
-                    device.DeviceGuid
-                ][(int)update.Offset] = new() {
+
+                value[(int)update.Offset] = new() {
                     Offset = update.Offset,
                     Sequence = update.Sequence,
                     Timestamp = update.Timestamp,

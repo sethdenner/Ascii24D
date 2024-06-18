@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine.Input {
+namespace Engine.Input
+{
     public interface IApplicationStateInput :
         IApplicationState,
         IHistorySerializable
     {
-        public InputFrame InputFrame {
+        public MessageFrame InputFrame {
             get; set;
         }
 

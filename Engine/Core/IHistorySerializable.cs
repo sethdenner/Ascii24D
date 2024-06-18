@@ -5,7 +5,7 @@
     /// </summary>
     public interface IHistorySerializable {
         /// <summary>
-        /// Implementation of this method should serialzie only the required
+        /// Implementation of this method should serialize only the required
         /// fields to restore the state of the game. Immutable fields need not
         /// be saved.
         /// </summary>
@@ -16,13 +16,13 @@
         public Memory<byte> SerializeHistoryFields();
         /// <summary>
         /// Implementation of this method should mirror the implementation of
-        /// <c>SerializeHistoryFields</c>. This is the reverse opperation where
+        /// <c>SerializeHistoryFields</c>. This is the reverse operation where
         /// we are taking data previously serialized by that method are now
         /// being deserialized and restored in this method.
         /// </summary>
         /// <param name="data">
         /// A memory buffer of data that was previously serialized by this
-        /// object using <c>SerialzieHistoryFields</c>
+        /// object using <c>SerializeHistoryFields</c>
         /// </param>
         public void DeserializeHistoryFields(Memory<byte> data);
     }

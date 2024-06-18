@@ -10,48 +10,48 @@ namespace Engine.Render.Helper {
             ConsolePixel[]  source,
             int sourceWidth,
             int sourceHeight,
-            Vector3 texturePosition
+            Vector2 texturePosition
         ) {
-            int screenX = (int)Math.Floor(texturePosition.X);
-            int screenY = (int)Math.Floor(texturePosition.Y);
+            int u = (int)Math.Floor(texturePosition.X);
+            int v = (int)Math.Floor(texturePosition.Y);
             int destinationTop = Math.Clamp(
-                screenY,
+                v,
                 0,
                 destinationHeight
             );
             int destinationLeft = Math.Clamp(
-                screenX,
+                u,
                 0,
                 destinationWidth
             );
             int destinationBottom = Math.Clamp(
-                screenY + sourceHeight,
+                v + sourceHeight,
                 0,
                 destinationHeight
             );
 
             int destinationRight = Math.Clamp(
-                screenX + sourceWidth,
+                u + sourceWidth,
                 0,
                 destinationWidth
             );
             int sourceTop = Math.Clamp(
-                destinationHeight - (screenY + destinationHeight),
+                destinationHeight - (v + destinationHeight),
                 0,
                 sourceHeight
             );
             int sourceLeft = Math.Clamp(
-                destinationWidth - (screenX + destinationWidth),
+                destinationWidth - (u + destinationWidth),
                 0,
                 sourceWidth
             );
             int sourceBottom = Math.Clamp(
-                Math.Abs(screenY - destinationHeight),
+                Math.Abs(v - destinationHeight),
                 0,
                 sourceHeight
             );
             int sourceRight = Math.Clamp(
-                Math.Abs(screenX - destinationWidth),
+                Math.Abs(u - destinationWidth),
                 0,
                 sourceWidth
             );

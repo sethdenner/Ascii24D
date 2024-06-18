@@ -19,49 +19,60 @@ namespace Engine.Input
     /// <c>DirectInputBinds</c> manages emitting user defined messages on user
     /// configured input messages.
     /// </summary>
-    public class DirectInputBinds
-    {
-        /// <summary>
-        /// <c>InputBinds</c> default constructor.
-        /// </summary>
-        public DirectInputBinds()
-        {
-        }
-        public CreateMouseMessage[] MouseBinds = new CreateMouseMessage[
-            (int)MouseOffset.Buttons7 + 1
-        ];
-        public CreateKeyboardMessage[] KeyboardBinds = new CreateKeyboardMessage[
-            (int)Key.MediaSelect + 1
-        ];
-        public CreateJoystickMessage[] JoystickBinds = new CreateJoystickMessage[
-            (int)JoystickOffset.ForceSliders1 + 1
-        ];
+    public class DirectInputBinds() {
+        public Dictionary<MouseOffset, CreateMouseMessage> MouseBinds = [];
+        public Dictionary<Key, CreateKeyboardMessage> KeyboardBinds = [];
+        public Dictionary<
+            JoystickOffset,
+            CreateJoystickMessage
+        > JoystickBinds = [];
         public bool IsMouseOffsetBound(MouseOffset offset) {
-            return null != MouseBinds[(int)offset];
+            return MouseBinds.ContainsKey(offset);
         }
         public bool IsKeyboardKeyBound(Key key) {
-            return null != KeyboardBinds[(int)key];
+            return KeyboardBinds.ContainsKey(key);
         }
         public bool IsJoystickOffsetBound(JoystickOffset offset) {
-            return null != JoystickBinds[(int)offset];
+            return JoystickBinds.ContainsKey(offset);
         }
-        public IMessage CreateMessageFromMouse(
+        public IMessage CreateMouseMessage(
             InputDevice device,
             MouseUpdate update
         ) {
-            return MouseBinds[(int)update.Offset](device, update);
+            return MouseBinds[update.Offset](device, update);
         }
-        public IMessage CreateMessageFromKeyboard(
+        public IMessage CreateKeyboardMessage(
             InputDevice device,
             KeyboardUpdate update
         ) {
-            return KeyboardBinds[(int)update.Key](device, update);
+            return KeyboardBinds[update.Key](device, update);
         }
-        public IMessage CreateMessageFromJoystick(
+        public IMessage CreateJoystickMessage(
             InputDevice device,
             JoystickUpdate update
         ) {
-            return JoystickBinds[(int)update.Offset](device, update);
+            return JoystickBinds[update.Offset](device, update);
+        }
+        public void SetMouseBind(
+            MouseOffset offset,
+            CreateMouseMessage createMouseMessage
+        ) {
+            MouseBinds.Remove(offset);
+            MouseBinds.Add(offset, createMouseMessage);
+        }
+        public void SetKeyboardBind(
+            Key key,
+            CreateKeyboardMessage createKeyboardMessage
+        ) {
+            KeyboardBinds.Remove(key);
+            KeyboardBinds.Add(key, createKeyboardMessage);
+        }
+        public void SetJoystickBind(
+            JoystickOffset offset,
+            CreateJoystickMessage createJoystickMessage
+        ) {
+            JoystickBinds.Remove(offset);
+            JoystickBinds.Add(offset, createJoystickMessage);
         }
     }
 }

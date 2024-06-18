@@ -1,95 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Engine.Core;
+﻿using Engine.Core;
 using SharpDX.DirectInput;
 
 
 namespace Engine.Input
 {
-    /// <summary>
-    /// <c>KeyboardMessage</c> delegate. Register a callback function matching
-    /// this signature to be notified when keyboard state changes.
-    /// </summary>
-    /// <param name="device">
-    /// <paramref name="device"/> is a reference to a <c>IInputDevice</c> 
-    /// instance representing the device that triggered the message.
-    /// </param>
-    /// <param name="update">
-    /// <paramref name="update"/> is the
-    /// <c>SharpDX.DirectInput.KeyboardUpdate</c> object containing event data
-    /// for the keyboard state change.
-    /// </param>
-    public delegate void KeyboardMessage(
-        InputDevice device,
-        KeyboardUpdate update
-    );
-    /// <summary>
-    /// <c>MouseMessage</c> delegate. Register a callback function matching
-    /// this signature to be notified when mouse state changes.
-    /// </summary>
-    /// <param name="device">
-    /// <paramref name="device"/> is a reference to a <c>IInputDevice</c>
-    /// instance representing the device that triggered the message.
-    /// </param>
-    /// <param name="update">
-    /// <paramref name="update"/> is the <c>SharpDX.DirectInput.MouseUpdate</c>
-    /// object containing event data for the mouse state change.
-    /// </param>
-    public delegate void MouseMessage(InputDevice device, MouseUpdate update);
-    /// <summary>
-    /// <c>JoystickMessage</c> delegate. Register a callback function matching
-    /// this signature to be notified when joystick state changes.
-    /// </summary>
-    /// <param name="device">
-    /// <paramref name="device"/> is a reference to a <c>IInputDevice</c> 
-    /// instance representing the device that triggered the message.
-    /// </param>
-    /// <param name="update">
-    /// <paramref name="update"/> is the
-    /// <c>SharpDX.DirectInput.JoystickUpdate</c> object containing event data
-    /// for the Joystick state change.
-    /// </param>
-    public delegate void JoystickMessage(
-        InputDevice device,
-        JoystickUpdate update
-    );
-    /// <summary>
-    /// <c>NewDeviceMessage</c> delegate. Register a callback function matching
-    /// this method signature to be notified when a new device is connected.
-    /// </summary>
-    /// <param name="deviceGuid">
-    /// <paramref name="deviceGuid"/> the <c>Guid</c> representing the newly
-    /// connected device.
-    /// </param>
-    /// <param name="deviceType">
-    /// The <c>SharpDX.DirectInput.DeviceType</c> member that corresponds to the
-    /// type of the device that has been connected.
-    /// </param>
-    public delegate void NewDeviceMessage(
-        Guid deviceGuid,
-        DeviceType deviceType
-    );
-    /// <summary>
-    /// <c>LostDeviceMessage</c> delegate. Register a callback function matching
-    /// this method signature to be notified when connection to a device is
-    /// lost.
-    /// </summary>
-    /// <param name="deviceGuid">
-    /// <paramref name="deviceGuid"/> the <c>Guid</c> representing the lost
-    /// device.
-    /// </param>
-    /// <param name="deviceType">
-    /// The <c>SharpDX.DirectInput.DeviceType</c> member that corresponds to the
-    /// type of the device that has been disconnected..
-    /// </param>
-    public delegate void LostDeviceMessage(
-        Guid deviceGuid,
-        DeviceType deviceType
-    );
     /// <summary>
     /// Input class wraps input functionality including instantiating the
     /// SharpDX.DirectInput wrapper and providing functionality to
@@ -97,20 +11,20 @@ namespace Engine.Input
     /// current input state.
     /// </summary>
     /// <remarks>
-    /// <c>Input</c> constuctor. Intializes standard collection members to
+    /// <c>Input</c> constructor. Initializes standard collection members to
     /// empty collections. Instantiates the <c>DirectInput</c> wrapper
     /// instance.
     /// </remarks>
     public class Input(IDirectInput directInputWrapper) {
         /// <summary>
         /// <c>_inputDevices</c> is a <c>List</c> of <c>InputDevice</c>
-        /// instances representing all supported and enumarated devices
+        /// instances representing all supported and enumerated devices
         /// connected to the system.
         /// </summary>
         public List<InputDevice> Devices = [];
         /// <summary>
         /// <c>_directInput</c> is a reference to an instance of a class that
-        /// implementes <c>IDirectInput</c> interface.
+        /// implements <c>IDirectInput</c> interface.
         /// wrapper class.
         /// </summary>
         private readonly IDirectInput _directInput = directInputWrapper;
@@ -131,17 +45,19 @@ namespace Engine.Input
         public void EnumerateDevices()
         {
             var inputDevices = _directInput.GetDevices();
+            MessageFrame frame = new();
             // Iterate over the collection of devices.
             foreach (var device in inputDevices)
             {
                 var inputDevice = _directInput.CreateInputDevice(device);
                 if (null == inputDevice) continue;
                 Devices.Add(inputDevice);
-                Messenger<NewDeviceMessage>.Trigger?.Invoke(
+                frame.AddMessage(new FoundDeviceMessage(
                     inputDevice.DeviceGuid,
                     inputDevice.GetDeviceType()
-                );
+                ));
             }
+            frame.PlayMessages();
         }
         /// <summary>
         /// The <c>Update</c> method iterates over all enumerated devices, polls
@@ -150,11 +66,11 @@ namespace Engine.Input
         /// <c>Guid</c>.
         /// </summary>
         /// <returns>
-        /// An instance of InputFrame populated with the bind triggers
+        /// An instance of MessageFrame populated with the bind triggers
         /// associated with user input.
         /// </returns>
-        public InputFrame Update() {
-            InputFrame frame = new();
+        public MessageFrame Update() {
+            MessageFrame frame = new();
                  
             for (int i = 0; i < Devices.Count; ++i) {
                 var device = Devices[i];
@@ -164,9 +80,9 @@ namespace Engine.Input
                     MouseUpdate[] updates = mouseDevice.GetUpdates();
                     for (int j = 0; j < updates.Length; ++j) {
                         var update = updates[j];
-                        Messenger<MouseMessage>.Trigger?.Invoke(device, update);
+                        frame.AddMessage(new MouseMessage(device, update));
                         if (Binds.IsMouseOffsetBound(update.Offset)) {
-                            IMessage message = Binds.CreateMessageFromMouse(
+                            IMessage message = Binds.CreateMouseMessage(
                                 device,
                                 update
                             );
@@ -180,9 +96,9 @@ namespace Engine.Input
                     KeyboardUpdate[] updates = keyboardDevice.GetUpdates();
                     for (int j = 0; j < updates.Length; ++j) {
                         var update = updates[j];
-                        Messenger<KeyboardMessage>.Trigger?.Invoke(device, update);
+                        frame.AddMessage(new KeyboardMessage(device, update));
                         if (Binds.IsKeyboardKeyBound(update.Key)) {
-                            IMessage message = Binds.CreateMessageFromKeyboard(
+                            IMessage message = Binds.CreateKeyboardMessage(
                                 device,
                                 update
                             );
@@ -198,9 +114,9 @@ namespace Engine.Input
                     JoystickUpdate[] updates = joystickDevice.GetUpdates();
                     for (int j = 0; j < updates.Length; ++j) {
                         var update = updates[j];
-                        Messenger<JoystickMessage>.Trigger?.Invoke(device, update);
+                        frame.AddMessage(new JoystickMessage(device, update));
                         if (Binds.IsJoystickOffsetBound(update.Offset)) {
-                            IMessage message = Binds.CreateMessageFromJoystick(
+                            IMessage message = Binds.CreateJoystickMessage(
                                 device,
                                 update
                             );
@@ -210,6 +126,7 @@ namespace Engine.Input
                 }
             }
 
+            frame.PlayMessages();
             return frame;
         }
         /// <summary>
