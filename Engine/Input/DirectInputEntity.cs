@@ -1,4 +1,5 @@
-﻿using Engine.Core.ECS;
+﻿using Engine.Core;
+using Engine.Core.ECS;
 
 namespace Engine.Input {
     public class DirectInputEntity : Entity {

@@ -6,7 +6,7 @@ namespace Engine.Input {
         InputDevice device,
         JoystickUpdate update
     ) : Message {
-        public delegate void JoystickMessageDelegate(
+        public delegate void Delegate(
             InputDevice device,
             JoystickUpdate update
         );
@@ -15,7 +15,7 @@ namespace Engine.Input {
         public JoystickUpdate Update = update;
 
         public override void Send() {
-            Messenger<JoystickMessageDelegate>.Trigger?.Invoke(
+            Messenger<Delegate>.Trigger?.Invoke(
                 Device,
                 Update
             );

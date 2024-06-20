@@ -33,12 +33,30 @@ namespace Engine.Render {
                 palette
             ));
 
-            Messenger<UpdateFramebufferMessage>.Register(UpdateFramebuffer);
+            Messenger<ApplicationWindowResizedMessage.Delegate>.Register(
+                ResizeFramebuffer
+            );
+            Messenger<UpdateFramebufferMessage.Delegate>.Register(
+                UpdateFramebuffer
+            );
         }
 
-        public void UpdateFramebuffer(ConsolePixel[] framebuffer) {
+        public void ResizeFramebuffer(SMALL_RECT newSizeRect) {
             var component = GetComponent<ConsoleRenderComponent>();
-            component.Framebuffer = framebuffer;
+            int width = newSizeRect.Right - newSizeRect.Left;
+            int height = newSizeRect.Bottom - newSizeRect.Top;
+            component.Framebuffer = new ConsolePixel[width * height];
+            component.FramebufferWidth = width;
+            component.FramebufferHeight = height;
+            SetComponent(component);
+        }
+
+        public void UpdateFramebuffer(int entityID, ConsolePixel[] framebuffer) {
+            if (EntityID == entityID) {
+                var component = GetComponent<ConsoleRenderComponent>();
+                component.Framebuffer = framebuffer;
+                SetComponent(component);
+            }
         }
     }
 }

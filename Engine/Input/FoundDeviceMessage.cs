@@ -6,7 +6,7 @@ namespace Engine.Input {
         Guid deviceGuid,
         DeviceType deviceType
     ) : Message {
-        public delegate void FoundDeviceMessageDelegate(
+        public delegate void Delegate(
             Guid deviceGuid,
             DeviceType deviceType
         );
@@ -14,7 +14,7 @@ namespace Engine.Input {
         Guid DeviceGuid = deviceGuid;
         DeviceType DeviceType = deviceType;
         public override void Send() {
-            Messenger<FoundDeviceMessageDelegate>.Trigger?.Invoke(
+            Messenger<Delegate>.Trigger?.Invoke(
                 DeviceGuid,
                 DeviceType
             );

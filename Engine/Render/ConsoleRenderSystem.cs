@@ -1,5 +1,6 @@
 ﻿using Engine.Core.ECS;
 using Engine.Native;
+using System.Numerics;
 
 namespace Engine.Render {
     public class ConsoleRenderSystem : System<ConsoleRenderComponent> {
@@ -7,7 +8,16 @@ namespace Engine.Render {
 
         public override void SetupComponent(
             ref ConsoleRenderComponent component
-        ) { }
+        ) {
+            component.ViewportMatrix = Matrix4x4.CreateViewport(
+               0, 0,
+               component.FramebufferWidth, component.FramebufferWidth,
+               -1, 1
+           );
+        }
+
+        public override void BeforeUpdates(long step, bool headless = false) {
+        }
 
         public override void UpdateComponent(
             ref ConsoleRenderComponent component,
@@ -26,6 +36,7 @@ namespace Engine.Render {
                     component.FontHeight
                 );
             }
+            /*
             try {
                 Array.Fill(
                     component.Framebuffer,
@@ -39,7 +50,7 @@ namespace Engine.Render {
                     component.FontHeight
                );
             }
-
+            */
             try {
                 Native.Native.CopyBufferToScreen(
                     component.Framebuffer,
@@ -92,11 +103,14 @@ namespace Engine.Render {
                fontWidth,
                fontHeight
             );
+
+            MessageOutbox.Add(new ApplicationWindowResizedMessage(
+                newWindowSize
+            ));
             return CreateFramebuffer(
                newWindowSize.Right,
                newWindowSize.Bottom
             );
         }
-
     }
 }

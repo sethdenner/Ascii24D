@@ -1,6 +1,6 @@
 ﻿namespace Engine.Core.ECS;
 
-public struct ComponentArray<T>(int capacity) {
+public class ComponentArray<T>(int capacity) {
     public Dictionary<int, int> IndexByEntityID = new(capacity);
     public T[] Array = new T[capacity];
     public int[] EntityIDByIndex = new int[capacity];
@@ -9,10 +9,10 @@ public struct ComponentArray<T>(int capacity) {
     public int ComponentCount = 0;
     public bool Fragmented = false;
 
-    public readonly Span<T> AsSpan() {
+    public Span<T> AsSpan() {
         return Array.AsSpan(0, ComponentCount);
     }
-    public readonly T this[int index] {
+    public T this[int index] {
         get {
             return Array[index];
         }
@@ -20,10 +20,10 @@ public struct ComponentArray<T>(int capacity) {
             Array[index] = value;
         }
     }
-    public readonly void SetComponentByEntityID(int entityID, T component) {
+    public void SetComponentByEntityID(int entityID, T component) {
         Array[IndexByEntityID[entityID]] = component;
     }
-    public readonly ref T GetComponentByEntityId(int entityID) {
+    public ref T GetComponentByEntityId(int entityID) {
         return ref Array[IndexByEntityID[entityID]];
     }
     public void Add(int entityId, T component) {

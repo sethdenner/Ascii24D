@@ -52,9 +52,9 @@ namespace Deathmatch {
             long step,
             bool headless = false
         ) {
-            for (int i = 0; i < state.CurrentScene.Characters.Count; ++i) {
+            for (int i = 0; i < state.CurrentScene.Entities.Count; ++i) {
                 if (
-                    state.CurrentScene.Characters[i] is not
+                    state.CurrentScene.Entities[i] is not
                     IPageable character
                 ) {
                     continue;
@@ -213,9 +213,9 @@ namespace Deathmatch {
             long step,
             bool headless = false
         ) {
-            for (int i = 0; i < state.CurrentScene.Characters.Count; ++i) {
+            for (int i = 0; i < state.CurrentScene.Entities.Count; ++i) {
                 if (
-                    state.CurrentScene.Characters[i] is not
+                    state.CurrentScene.Entities[i] is not
                     IInputControllable character
                 ) {
                     continue;
@@ -281,9 +281,9 @@ namespace Deathmatch {
         public override void Cleanup(IApplicationState state) { }
 
         public override void Setup(IApplicationState state) {
-            for (int i = 0; i < state.CurrentScene.Characters.Count; ++i) {
+            for (int i = 0; i < state.CurrentScene.Entities.Count; ++i) {
                 if (
-                    state.CurrentScene.Characters[i] is not
+                    state.CurrentScene.Entities[i] is not
                     CharacterArena character
                 ) {
                     continue;
@@ -356,9 +356,9 @@ namespace Deathmatch {
         }
 
         public override void Setup(IApplicationState state) {
-            for (int i = 0; i < state.CurrentScene.Characters.Count; ++i) {
+            for (int i = 0; i < state.CurrentScene.Entities.Count; ++i) {
                 if (
-                    state.CurrentScene.Characters[i] is not
+                    state.CurrentScene.Entities[i] is not
                     CharacterCamera character
                 ) {
                     continue;
@@ -386,9 +386,9 @@ namespace Deathmatch {
             bool headless = false
         ) {
             CharacterCamera? activeCamera = null;
-            for (int i = 0; i < state.CurrentScene.Characters.Count; ++i) {
+            for (int i = 0; i < state.CurrentScene.Entities.Count; ++i) {
                 if (
-                    state.CurrentScene.Characters[i] is
+                    state.CurrentScene.Entities[i] is
                     CharacterCamera character
                 ) {
                     if (null != character.FocusCharacter) {
@@ -432,7 +432,7 @@ namespace Deathmatch {
                 }
             };
             var scene = new Scene() {
-                Characters = [
+                Entities = [
                     new CharacterArena(),
                     playerCharacter,
                     new CharacterCamera() { 
@@ -459,7 +459,7 @@ namespace Deathmatch {
                 ]
             };
             var stage = new Stage([scene], scene) {
-                Simulations = [
+                Systems = [
                     new SimulationDirectInput(),
                     new SimulationPlayerControl(),
                     new SimulationArena(),

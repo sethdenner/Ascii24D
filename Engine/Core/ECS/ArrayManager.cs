@@ -17,7 +17,7 @@
             )) {
                 ArrayIndices.Add(type, ArrayCount);
                 ComponentArrays[ArrayCount] = new ComponentArray<T>(capacity);
-                ++ArrayCount;
+                arrayIndex = ArrayCount++;
             }
             var array = (ComponentArray<T>)ComponentArrays[arrayIndex];
             if (0 >= capacity && array.Capacity < capacity) {

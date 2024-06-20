@@ -109,29 +109,29 @@ namespace EngineTests
         public void TestInputUpdate()
         {
             // Define int variables to keep track of how many event
-            // messages of each type we have recieved.
-            int joystickMessageRecieved = 0;
-            int keyboardMessageRecieved = 0;
-            int mouseMessageRecieved = 0;
+            // messages of each type we have received.
+            int joystickMessageReceived = 0;
+            int keyboardMessageReceived = 0;
+            int mouseMessageReceived = 0;
             // Startup handlers to check if input messages are sent properly.
-            Messenger<JoystickMessage>.Register((device, update) => {
-                ++joystickMessageRecieved;
+            Messenger<JoystickMessage.Delegate>.Register((device, update) => {
+                ++joystickMessageReceived;
             });
-            Messenger<KeyboardMessage>.Register((device, update) => {
-                ++keyboardMessageRecieved;
+            Messenger<KeyboardMessage.Delegate>.Register((device, update) => {
+                ++keyboardMessageReceived;
             });
-            Messenger<MouseMessage>.Register((device, update) => {
-                ++mouseMessageRecieved;
+            Messenger<MouseMessage.Delegate>.Register((device, update) => {
+                ++mouseMessageReceived;
             });
             Mock<Engine.Input.IDirectInput> mockDirectInput = CreateDirectInputMock();
-            Input input = new Input(mockDirectInput.Object);
+            Input input = new(mockDirectInput.Object);
 
             input.EnumerateDevices();
             input.Update();
 
-            Assert.Equal(2, joystickMessageRecieved);
-            Assert.Equal(2, keyboardMessageRecieved);
-            Assert.Equal(2, mouseMessageRecieved);
+            Assert.Equal(2, joystickMessageReceived);
+            Assert.Equal(2, keyboardMessageReceived);
+            Assert.Equal(2, mouseMessageReceived);
         }
     }
 }

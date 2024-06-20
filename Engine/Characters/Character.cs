@@ -6,7 +6,7 @@ using Engine.Render;
 namespace Engine.Characters
 {
     /// <summary>
-    /// <c>Character</c> abstract class. Characters have visual components
+    /// <c>Character</c> abstract class. Entities have visual components
     /// in the form of sprites and behavior defined in methods that manipulate
     /// those sprites.
     /// </summary>

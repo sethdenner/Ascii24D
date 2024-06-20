@@ -4,21 +4,30 @@ using Engine.Native;
 using System.Numerics;
 
 namespace Engine.Render {
-    public class SpriteSystem(
-        int framebufferWidth,
-        int framebufferHeight
-    ) : System<SpriteComponent> {
-        public delegate void UpdateFramebufferMessage(
-            ConsolePixel[] framebuffer
-        );
+    public class SpriteSystem : System<SpriteComponent> {
+        public ConsolePixel[] Framebuffer;
+        public int ConsoleRenderEntityID;
+        public int FramebufferWidth;
+        public int FramebufferHeight;
+        public Matrix4x4 WorldCameraViewport;
 
-        public ConsolePixel[] Framebuffer = new Native.ConsolePixel[
-            framebufferWidth * framebufferHeight
-        ];
-        public int FramebufferWidth = framebufferWidth;
-        public int FramebufferHeight = framebufferHeight;
-        public Matrix4x4 WorldCameraViewport = Matrix4x4.Identity;
+        public SpriteSystem(
+            int consoleRenderEntityID,
+            int framebufferWidth,
+            int framebufferHeight
+        ) {
+            Framebuffer = new Native.ConsolePixel[
+                framebufferWidth * framebufferHeight
+            ];
+            ConsoleRenderEntityID = consoleRenderEntityID;
+            FramebufferWidth = framebufferWidth;
+            FramebufferHeight = framebufferHeight;
+            WorldCameraViewport = Matrix4x4.Identity;
 
+            Message.Register<ApplicationWindowResizedMessage.Delegate>(
+                ResizeFramebuffer
+            );
+        }
         public override void Cleanup() {
             throw new NotImplementedException();
         }
@@ -45,15 +54,6 @@ namespace Engine.Render {
                 screenPosition.X,
                 screenPosition.Y
             );
-            Sprite sprite = new(
-                component.Width,
-                component.Height,
-                (int)Math.Ceiling(screenPosition.X),
-                (int)Math.Ceiling(screenPosition.Y)
-            );
-            component.BufferPixels.AsSpan().CopyTo(
-                sprite.BufferPixels.AsSpan()
-            );
             Helper.Methods.BlendTextures(
                 Framebuffer,
                 FramebufferWidth,
@@ -74,7 +74,19 @@ namespace Engine.Render {
         public override void AfterUpdates(long step, bool headless = false) {
             if (headless) { return; }
 
-            Messenger<UpdateFramebufferMessage>.Trigger?.Invoke(Framebuffer);
+            new UpdateFramebufferMessage(
+                ConsoleRenderEntityID,
+                Framebuffer
+            ).Send();
         }
+
+        public void ResizeFramebuffer(SMALL_RECT newSizeRect) {
+            int width = newSizeRect.Right - newSizeRect.Left;
+            int height = newSizeRect.Bottom - newSizeRect.Top;
+            Framebuffer = new ConsolePixel[width * height];
+            FramebufferWidth = width;
+            FramebufferHeight = height;
+        }
+
     }
 }

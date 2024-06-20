@@ -6,7 +6,7 @@ namespace Engine.Input {
         InputDevice device,
         MouseUpdate update
     ) : Message {
-        public delegate void MouseMessageDelegate(
+        public delegate void Delegate(
             InputDevice device,
             MouseUpdate update
         );
@@ -15,7 +15,7 @@ namespace Engine.Input {
         MouseUpdate Update = update;
 
         public override void Send() {
-            Messenger<MouseMessageDelegate>.Trigger?.Invoke(
+            Messenger<Delegate>.Trigger?.Invoke(
                 Device,
                 Update
             );

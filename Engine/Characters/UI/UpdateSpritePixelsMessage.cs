@@ -8,7 +8,7 @@ namespace Engine.Characters.UI {
         int height,
         ConsolePixel[] bufferPixels
     ) : Message {
-        delegate void UpdateSpritePixelsMessageDelegate(
+        public delegate void Delegate(
             int entityID,
             int width,
             int height,
@@ -20,7 +20,7 @@ namespace Engine.Characters.UI {
         public int Height = height;
         public ConsolePixel[] BufferPixels = bufferPixels;
         public override void Send() {
-            Messenger<UpdateSpritePixelsMessageDelegate>.Trigger?.Invoke(
+            Messenger<Delegate>.Trigger?.Invoke(
                 EntityID,
                 Width,
                 Height,

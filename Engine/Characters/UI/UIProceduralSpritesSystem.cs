@@ -1,5 +1,7 @@
 ﻿using Engine.Core.ECS;
 using Engine.Native;
+using Engine.Render;
+using System.Numerics;
 
 namespace Engine.Characters.UI {
     public class UIProceduralSpritesSystem :
@@ -19,6 +21,9 @@ namespace Engine.Characters.UI {
             long step,
             bool headless = false
         ) {
+            if (component.Regenerate) {
+                GenerateUISprites(ref component);
+            }
         }
         public void GenerateUISprites(
             ref UIProceduralSpritesComponent component
@@ -52,59 +57,62 @@ namespace Engine.Characters.UI {
             if (width <= 0 || height <= 0) {
                 return;
             }
-            ConsolePixel[] textSprite = new ConsolePixel[width * height];
-            int offsetX = component.PaddingLeft + component.BorderWidth + positionX;
-            int offsetY = component.PaddingTop + component.BorderWidth + positionY;
+            if (0 < component.Text.Length) {
+                int offsetX = component.PaddingLeft + component.BorderWidth;
+                int offsetY = component.PaddingTop + component.BorderWidth;
 
-            int newLineCount = 0;
-            int newLineIndexOffset = 0;
-            int usableWidth = (
-                component.Width - component.PaddingLeft -
-                component.PaddingRight -
-                2 * component.BorderWidth
-            );
-            int usableHeight = (
-                component.Height - component.PaddingTop -
-                component.PaddingBottom -
-                2 * component.BorderWidth
-            );
-            for (int i = 0; i < component.Text.Length; ++i) {
-                int adjustedIndex = i - newLineIndexOffset;
-                int x = adjustedIndex % usableWidth;
-                int y = adjustedIndex / usableWidth + newLineCount;
-                if ('\n' == component.Text[i]) {
-                    if (0 != x) {
-                        ++newLineCount;
-                        newLineIndexOffset += x + 1;
-                    } else {
-                        ++newLineIndexOffset;
+                int newLineCount = 0;
+                int newLineIndexOffset = 0;
+                int usableWidth = (
+                    component.Width - component.PaddingLeft -
+                    component.PaddingRight -
+                    2 * component.BorderWidth
+                );
+                int usableHeight = (
+                    component.Height - component.PaddingTop -
+                    component.PaddingBottom -
+                    2 * component.BorderWidth
+                );
+                ConsolePixel[] textSprite = new ConsolePixel[
+                    usableWidth * usableHeight
+                ];
+                for (int i = 0; i < component.Text.Length; ++i) {
+                    int adjustedIndex = i - newLineIndexOffset;
+                    int x = adjustedIndex % usableWidth;
+                    int y = adjustedIndex / usableWidth + newLineCount;
+                    if ('\n' == component.Text[i]) {
+                        if (0 != x) {
+                            ++newLineCount;
+                            newLineIndexOffset += x + 1;
+                        } else {
+                            ++newLineIndexOffset;
+                        }
+                        continue;
                     }
-                    continue;
-                }
 
-                SetPixel(
+                    SetPixel(
+                        textSprite,
+                        usableWidth,
+                        usableHeight,
+                        x,
+                        y,
+                        new ConsolePixel(
+                            component.TextForegroundColorIndex,
+                            component.TextBackgroundColorIndex,
+                            component.Text[i]
+                        )
+                    );
+                }
+                Render.Helper.Methods.BlendTextures(
+                    windowSprite,
+                    component.Width,
+                    component.Height,
                     textSprite,
-                    usableWidth,
-                    usableHeight,
-                    x,
-                    y,
-                    new ConsolePixel(
-                        component.TextForegroundColorIndex,
-                        component.TextBackgroundColorIndex,
-                        component.Text[i]
-                    )
+                    width,
+                    height,
+                    new(offsetX, offsetY)
                 );
             }
-
-            Render.Helper.Methods.BlendTextures(
-                windowSprite,
-                component.Width,
-                component.Height,
-                textSprite,
-                width,
-                height,
-                new(offsetX, offsetY)
-            );
 
             MessageOutbox.Add(new UpdateSpritePixelsMessage(
                 component.SpriteEntityID,
@@ -112,8 +120,13 @@ namespace Engine.Characters.UI {
                 component.Height,
                 windowSprite
             ));
+
+            MessageOutbox.Add(new UpdateSpriteModelPositionMessage(
+                component.SpriteEntityID,
+                new Vector3(positionX, positionY, component.Position.Z)
+            ));
         }
-        public bool IsPixelAtIndexBorder(
+        public static bool IsPixelAtIndexBorder(
             int i,
             UIProceduralSpritesComponent component
         ) {
@@ -153,7 +166,7 @@ namespace Engine.Characters.UI {
         /// <c>true</c> if the pixel was set. <c>false</c> if the pixel was
         /// rejected for some reason.
         /// </returns>
-        public bool SetPixel(
+        public static bool SetPixel(
             Span<ConsolePixel> pixels,
             int width,
             int height,

@@ -1,68 +1,95 @@
 ﻿using Engine.Native;
+using Engine.Render;
 using System.Numerics;
 
 namespace Engine.Characters.UI {
-    public struct UIProceduralSpritesComponent {
-        public int SpriteEntityID;
+    public struct UIProceduralSpritesComponent(
+        int spriteEntityId,
+        int width,
+        int height,
+        Vector3 position,
+        ConsolePixel backgroundPixel,
+        ConsolePixel borderPixel,
+        int borderWidth,
+        int paddingTop,
+        int paddingRight,
+        int paddingBottom,
+        int paddingLeft,
+        string text,
+        byte textForegroundColor,
+        byte textBackgroundColor,
+        ChildLayout childLayout,
+        bool autoSize,
+        int autoSizeMargin = 0
+    ) {
+        public int SpriteEntityID = spriteEntityId;
         /// <summary>
         /// 
         /// </summary>
-        public Vector3 Position;
+        public Vector3 Position = position;
         /// <summary>
         /// 
         /// </summary>
-        public int Width;
+        public int Width = width;
         /// <summary>
         /// 
         /// </summary>
-        public int Height;
+        public int Height = height;
         /// <summary>
         /// 
         /// </summary>
-        public int PaddingTop;
+        public int PaddingTop = paddingTop;
         /// <summary>
         /// 
         /// </summary>
-        public int PaddingRight;
+        public int PaddingRight = paddingRight;
         /// <summary>
         /// 
         /// </summary>
-        public int PaddingBottom;
+        public int PaddingBottom = paddingBottom;
         /// <summary>
         /// 
         /// </summary>
-        public int PaddingLeft;
+        public int PaddingLeft = paddingLeft;
         /// <summary>
         /// 
         /// </summary>
-        public ChildLayout Layout;
+        public ChildLayout Layout = childLayout;
         /// <summary>
         /// 
         /// </summary>
-        public int BorderWidth;
+        public int BorderWidth = borderWidth;
         /// <summary>
         /// 
         /// </summary>
-        public bool ShowBorder;
+        public ConsolePixel BackgroundPixel = backgroundPixel;
         /// <summary>
         /// 
         /// </summary>
-        public ConsolePixel BackgroundPixel;
+        public ConsolePixel BorderPixel = borderPixel;
         /// <summary>
         /// 
         /// </summary>
-        public ConsolePixel BorderPixel;
+        public byte TextForegroundColorIndex = textForegroundColor;
         /// <summary>
         /// 
         /// </summary>
-        public byte TextForegroundColorIndex;
+        public byte TextBackgroundColorIndex = textBackgroundColor;
         /// <summary>
         /// 
         /// </summary>
-        public byte TextBackgroundColorIndex;
+        public string Text = text;
         /// <summary>
         /// 
         /// </summary>
-        public string Text;
+        public bool Regenerate = false;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool AutoSize = autoSize;
+        /// <summary>
+        /// 
+        /// </summary>
+        public int AutoSizeMargin = autoSizeMargin;
     }
 }

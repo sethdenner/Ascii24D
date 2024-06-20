@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace Engine.Characters {
     /// <summary>
-    /// <c>ICharacter</c> interface. Characters have visual components
+    /// <c>ICharacter</c> interface. Entities have visual components
     /// in the form of sprites and behavor defined in methods that manipulate
     /// those sprites.
     /// </summary>

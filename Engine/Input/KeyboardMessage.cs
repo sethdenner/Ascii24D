@@ -6,7 +6,7 @@ namespace Engine.Input {
         InputDevice device,
         KeyboardUpdate update
     ) : Message {
-        public delegate void KeyboardMessageDelegate(
+        public delegate void Delegate(
             InputDevice device,
             KeyboardUpdate update
         );
@@ -15,7 +15,7 @@ namespace Engine.Input {
         public KeyboardUpdate Update = update;
 
         public override void Send() {
-            Messenger<KeyboardMessageDelegate>.Trigger?.Invoke(
+            Messenger<Delegate>.Trigger?.Invoke(
                 Device,
                 Update
             );

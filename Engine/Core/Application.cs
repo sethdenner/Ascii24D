@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -16,17 +17,17 @@ namespace Engine.Core {
     /// their startup execution and teardown.
     /// </summary>
     /// <param name="tickRate">
-    /// The tick rate is how often a simulation step should be executed
+    /// The tick rate is how often a system step should be executed
     /// measured in 100s of nanoseconds (10,000 ticks = 1ms).
     /// </param>
     /// <param name="simulationStep">
-    /// The simulation step is the fixed time step to use for each simulation
+    /// The system step is the fixed time step to use for each system
     /// step measured in 100s of nanoseconds (10,000 ticks = 1ms). For
     /// "real-time" execution <c>simulationStep</c> should equal
-    /// <c>tickRate</c>. You can make the simulation more precise by lowering
-    /// the simulation step but the simulation will update in slow-motion if
+    /// <c>tickRate</c>. You can make the system more precise by lowering
+    /// the system step but the system will update in slow-motion if
     /// <c>simulationStep</c> is less than <c>tickRate</c>. Conversely if the
-    /// simulation step is larger than the tick rate the simulation will be less
+    /// system step is larger than the tick rate the system will be less
     /// accurate but will execute in fast-forward.
     /// </param>
     /// <param name="applicationState">
@@ -36,29 +37,36 @@ namespace Engine.Core {
     public abstract class Application(
         long tickRate,
         long simulationStep,
-        Stage initialStage,
-        IApplicationState state
+        Stage initialStage
     ) {
+        public long FrameCount {
+            get; set;
+        } = 0;
+        public Matrix4x4 ViewMatrix {
+            get; set;
+        } = Matrix4x4.Identity;
+        public List<Scene> LoadedScenes {
+            get; set;
+        } = [];
+        public Scene CurrentScene {
+            get; set;
+        } = initialStage.InitialScene;
         /// <summary>
-        /// The tick rate is how often a simulation step should be executed
+        /// The tick rate is how often a system step should be executed
         /// measured in 100s of nanoseconds (10,000 ticks = 1ms).
         /// </summary>
         public long TickRate = tickRate;
         /// <summary>
-        /// The simulation step is the fixed time step to use for each simulation
+        /// The system step is the fixed time step to use for each system
         /// step measured in 100s of nanoseconds (10,000 ticks = 1ms). For
         /// "real-time" execution <c>SimulationStep</c> should equal
-        /// <c>TickRate</c>. You can make the simulation more precise by lowering
-        /// the simulation step but the simulation will update in slow-motion if
+        /// <c>TickRate</c>. You can make the system more precise by lowering
+        /// the system step but the system will update in slow-motion if
         /// <c>SimulationStep</c> is less than <c>TickRate</c>. Conversely if the
-        /// simulation step is larger than the tick rate the simulation will be less
+        /// system step is larger than the tick rate the system will be less
         /// accurate but will execute in fast-forward.
         /// </summary>
         public long SimulationStep = simulationStep;
-        /// <summary>
-        /// 
-        /// </summary>
-        readonly IApplicationState State = state;
         /// <summary>
         /// 
         /// </summary>
@@ -123,9 +131,9 @@ namespace Engine.Core {
             }
         }
         /// <summary>
-        /// Starts the application. Starts all services asyncronously, calls the
-        /// <c>Setup</c> method for all simulations and starts the simulation
-        /// loop. Runs asyncronously and will not complete until the simulation
+        /// Starts the application. Starts all services asynchronously, calls the
+        /// <c>Setup</c> method for all simulations and starts the system
+        /// loop. Runs asynchronously and will not complete until the system
         /// loop completes and all service tasks have completed. Call
         /// <c>Shutdown</c> to cleanup and close the application.
         /// </summary>
@@ -139,33 +147,33 @@ namespace Engine.Core {
                 );
             }
 
-            for (int i = 0; i < CurrentStage.Simulations.Count; ++i) {
-                var simulation = CurrentStage.Simulations[i];
-                simulation.Setup(State);
+            for (int i = 0; i < CurrentStage.Systems.Count; ++i) {
+                var system = CurrentStage.Systems[i];
+                system.Setup();
             }
 
-            for (int i = 0; i < CurrentStage.SimulationsAsync.Count; ++i) {
-                var simulation = CurrentStage.SimulationsAsync[i];
-                simulation.Setup(State);
+            for (int i = 0; i < CurrentStage.SystemsAsync.Count; ++i) {
+                var system = CurrentStage.SystemsAsync[i];
+                system.Setup();
             }
 
             await StartSimulationLoop();
             await Task.WhenAll(serviceTasks);
         }
         /// <summary>
-        /// Cleans up and terminates execution of all services and simulations.
+        /// Cleans up and terminates execution of all services and systems.
         /// </summary>
         public void Shutdown() {
             IsRunning = false;
 
-            for (int i = CurrentStage.SimulationsAsync.Count; i >= 0; --i) {
-                var simulation = CurrentStage.SimulationsAsync[i];
-                simulation.Cleanup(State);
+            for (int i = CurrentStage.SystemsAsync.Count; i >= 0; --i) {
+                var system = CurrentStage.SystemsAsync[i];
+                system.Cleanup();
             }
 
-            for (int i = CurrentStage.Simulations.Count; i >= 0; --i) {
-                var simulation = CurrentStage.SimulationsAsync[i];
-                simulation.Cleanup(State);
+            for (int i = CurrentStage.Systems.Count; i >= 0; --i) {
+                var system = CurrentStage.SystemsAsync[i];
+                system.Cleanup();
             }
 
             for (int i = CurrentStage.Services.Count - 1; i >= 0; --i) {
@@ -190,7 +198,7 @@ namespace Engine.Core {
                 long timeDelta = time - prevTime;
                 accumulator += timeDelta;
                 while (accumulator > TickRate) {
-                    await UpdateSimulations(SimulationStep);
+                    await UpdateSystems(SimulationStep);
                     accumulator -= TickRate;
                 }
 
@@ -201,35 +209,34 @@ namespace Engine.Core {
             }
         }
         /// <summary>
-        /// Updates all simulations. First asynchronous simulation tasks are
+        /// Updates all simulations. First asynchronous system tasks are
         /// started and then the rest of the simulations are updated
         /// synchronously.
         /// </summary>
         /// <param name="step">
-        /// The time step to advance the simulation in ticks. Ticks are 100s of
+        /// The time step to advance the system in ticks. Ticks are 100s of
         /// nanoseconds (10,000 ticks = 1ms).
         /// </param>
         /// <param name="headless">
-        /// If true indicates that the simulation will not be intended to be
+        /// If true indicates that the system will not be intended to be
         /// displayed so the step can be optimized by excluding any elements of
-        /// the simulation that are unnecessary for determining the state of
+        /// the system that are unnecessary for determining the state of
         /// future steps.
         /// </param>
-        public async Task UpdateSimulations(long step, bool headless=false) {
+        public async Task UpdateSystems(long step, bool headless=false) {
             Task[] simulationTasks = new Task[
-                CurrentStage.SimulationsAsync.Count
+                CurrentStage.SystemsAsync.Count
             ];
-            for (int i = 0; i < CurrentStage.SimulationsAsync.Count; ++i) {
-                var simulation = CurrentStage.SimulationsAsync[i];
-                simulationTasks[i] = simulation.SimulateAsync(
-                    State,
+            for (int i = 0; i < CurrentStage.SystemsAsync.Count; ++i) {
+                var system = CurrentStage.SystemsAsync[i];
+                simulationTasks[i] = system.UpdateAsync(
                     step,
                     headless
                 );
             }
-            for (int i = 0; i < CurrentStage.Simulations.Count; ++i) {
-                var simulation = CurrentStage.Simulations[i];
-                simulation.Simulate(State, step, headless);
+            for (int i = 0; i < CurrentStage.Systems.Count; ++i) {
+                var System = CurrentStage.Systems[i];
+                System.Update(step, headless);
             }
 
             await Task.WhenAll(simulationTasks);
