@@ -260,7 +260,7 @@ namespace DirectInputDebugDemo
             // WTH? Should the position and what not be updated every frame?
             Width = Native.Native.WindowWidth - 2;
             Height = Native.Native.WindowHeight - 2;
-            Position = new Vector3() {
+            WorldPosition = new Vector3() {
                 X = 1,
                 Y = 1,
                 Z = 10002
@@ -439,7 +439,7 @@ namespace DirectInputDebugDemo
                 debugUISpriteEntity.EntityID,
                 framebufferWidth - 2, // Width
                 framebufferHeight - 2, // Height
-                new Vector3(1, 1, 0), // Position
+                new Vector3(1, 1, 0), // WorldPosition
                 new ConsolePixel() { // Background Pixel
                     ForegroundColorIndex = 8,
                     BackgroundColorIndex = 9,
@@ -470,7 +470,7 @@ namespace DirectInputDebugDemo
                 frameTimeUISpriteEntity.EntityID,
                 0, // Width
                 0, // Height
-                Vector3.Zero, // Position
+                Vector3.Zero, // WorldPosition
                 new ConsolePixel() {
                 }, // Background Pixel
                 new ConsolePixel() { },// Foreground Pixel

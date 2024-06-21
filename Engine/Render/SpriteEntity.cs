@@ -40,13 +40,13 @@ namespace Engine.Render {
                     SetComponent(component);
                 }
             });
-            Message.Register<UpdateSpriteModelPositionMessage.Delegate>((
+            Message.Register<UpdateSpritePositionMessage.Delegate>((
                 entityID,
                 position
             ) => {
                 if (EntityID == entityID) {
                     var component = GetComponent<SpriteComponent>();
-                    component.ModelPosition = position;
+                    component.WorldPosition = position;
                     SetComponent(component);
                 }
             });

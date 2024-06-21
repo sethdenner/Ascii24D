@@ -21,7 +21,7 @@ namespace Engine.Render {
         /// <summary>
         /// The position of this sprite in Model-Space (before world transform).
         /// </summary>
-        public Vector3 ModelPosition = modelPosition;
+        public Vector3 WorldPosition = modelPosition;
         /// <summary>
         /// Flag used to determine if this sprite should be transformed to
         /// screen space. Should be false for UI or other elements that don't
@@ -32,5 +32,7 @@ namespace Engine.Render {
         /// An array of <c>Pixel</c> instances representing the sprite.
         /// </summary>
         public ConsolePixel[] BufferPixels = bufferPixels;
-  }
+
+        public Vector2 ScreenCoordinates = Vector2.Zero;
+    }
 }

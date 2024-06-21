@@ -9,11 +9,6 @@ namespace Engine.Render {
         public override void SetupComponent(
             ref ConsoleRenderComponent component
         ) {
-            component.ViewportMatrix = Matrix4x4.CreateViewport(
-               0, 0,
-               component.FramebufferWidth, component.FramebufferWidth,
-               -1, 1
-           );
         }
 
         public override void BeforeUpdates(long step, bool headless = false) {

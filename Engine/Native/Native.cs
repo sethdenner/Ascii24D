@@ -28,12 +28,12 @@
         /// </param>
         /// <param name="left">
         /// The left (x) position of the screen buffer area to write to.
-        /// Position is relative to the left side of the console screen. Units
+        /// WorldPosition is relative to the left side of the console screen. Units
         /// are in console columns.
         /// </param>
         /// <param name="top">
         /// The top (y) position of the screen buffer area to write to.
-        /// Position is relative to the top of the console screen. Units are in
+        /// WorldPosition is relative to the top of the console screen. Units are in
         /// console rows.
         ///</param>
         public static void CopyBufferToScreen(

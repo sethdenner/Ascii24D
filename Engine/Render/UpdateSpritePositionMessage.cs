@@ -2,7 +2,7 @@
 using System.Numerics;
 
 namespace Engine.Render {
-    public class UpdateSpriteModelPositionMessage(
+    public class UpdateSpritePositionMessage(
         int entityID,
         Vector3 position
     ) : Message {

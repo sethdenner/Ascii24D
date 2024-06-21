@@ -18,6 +18,5 @@ namespace Engine.Render {
         public ConsolePixel[] Framebuffer = framebuffer;
         public ConsolePixel FillPixel = fillPixel;
         public PaletteInfo[] Palette = palette;
-        public Matrix4x4 ViewportMatrix = Matrix4x4.Identity;
     }
 }

@@ -121,7 +121,7 @@ namespace Engine.Characters.UI {
                 windowSprite
             ));
 
-            MessageOutbox.Add(new UpdateSpriteModelPositionMessage(
+            MessageOutbox.Add(new UpdateSpritePositionMessage(
                 component.SpriteEntityID,
                 new Vector3(positionX, positionY, component.Position.Z)
             ));

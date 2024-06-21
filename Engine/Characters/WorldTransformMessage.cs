@@ -6,13 +6,13 @@ namespace Engine.Characters {
         int entityID,
         Matrix4x4 world
     ) : Message {
-        delegate void WorldTransformDelegate(int entityID, Matrix4x4 world);
+        delegate void Delegate(int entityID, Matrix4x4 world);
 
         public int EntityID = entityID;
         public Matrix4x4 World = world;
 
         public override void Send() {
-            Messenger<WorldTransformDelegate>.Trigger?.Invoke(EntityID, World);
+            Messenger<Delegate>.Trigger?.Invoke(EntityID, World);
         }
     }
 }
